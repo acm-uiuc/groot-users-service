@@ -11,12 +11,13 @@ class User(Base):
         schemes = [
             'pbkdf2_sha512'
         ]))
-    
-    def __init__(self, username, email, password):
+
+    def __init__(self, firstname, lastname, username, email, password):
+        self.firstname = firstname
+        self.lastname = lastname
         self.username = username
         self.email = email
         self.password = password
-    
+
     def __repr__(self):
         return '<User %r>' %self.username
-
