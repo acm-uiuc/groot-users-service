@@ -7,6 +7,8 @@ class User(Base):
     lastname= db.Column(db.String(80))
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), unique=True)
+    # The PasswordType type implements passlib to securely hash passwords
+    # Current scheme is sha512, but can be changed easily.
     password = db.Column(PasswordType(
         schemes = [
             'pbkdf2_sha512'
