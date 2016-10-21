@@ -1,0 +1,16 @@
+{
+  "name": "groot-user-service",
+  "version": "1.0.0",
+  "description": "A User service for groot",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aashish Kapur",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "mysql": "^2.11.1",
+  }
+}
