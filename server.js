@@ -1,5 +1,4 @@
 require('dotenv').config();
-// console.log(process.env.DB_HOST+ "\t" +  process.env.DB_USER + "\t" + process.env.DB_PASS + "\t" + process.env.DB_NAME);
 
 const PORT = 8001;
 
@@ -11,6 +10,9 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+var request = require('request');
+require('request-debug')(request);
+
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : process.env.DB_HOST,
@@ -20,9 +22,10 @@ var connection = mysql.createConnection({
 });
 
 
-
 app.get('/users/pre', function (req, res) {
+	console.log("GET /users/pre");
 	connection.query('SELECT * FROM pre_users', function(err, rows) {
+		console.log(err);
 		console.log(rows);
 		return res.json(rows);
 	});
@@ -36,13 +39,8 @@ app.get('/users/current', function (req, res) {
 });
 
 app.get('/users/:netid', function(req, res){
-	// "SELECT * FROM users where netid == $1", netid
 	console.log("NETID: " + req.params["netid"]);
 	var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-	// var sql = "SELECT * FROM `user_info` WHERE `netid` = $";
-	// var inserts = [req.params["netid"]];
-	// sql = mysql.format(sql, inserts);
-	// console.log("SQL: " + sql, "\tinserts: " + inserts);
 	connection.query(sql, function(err, rows) {
 		if (err) throw err;
 		console.log(rows);
@@ -50,23 +48,18 @@ app.get('/users/:netid', function(req, res){
 	});
 });
 
-
 app.get('/users/:netid/isMember', function(req, res){
-	// "SELECT * FROM users where netid == $1", netid
 	console.log("NETID: " + req.params["netid"]);
 	var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
 	connection.query(sql, function(err, rows) {
 		if (err) throw err;
 		console.log("ROWS: " + rows);
-		// console.log(JSON.parse());
 		console.log(rows.netid);
 		if(rows != "")
 			return res.json({"isMember" : "true"});
 		return res.json({"isMember" : "false"});
 	});
 });
-
-
 
 
 app.post('/newUser', function(req, res) {
@@ -86,7 +79,6 @@ app.post('/newUser', function(req, res) {
 
 	/*
 		netid, UIN, first name, last name
-	
 	*/
 });
 
@@ -138,6 +130,90 @@ app.post('/user/paid', function(req, res) {
 
 });
 
+app.post('/token', function(req, res){
+	// passing
+	// netid, password
+	var netid = req.body.netid;
+	var pass = req.body.password;
+
+	var options = {
+		uri: process.env.CROWD_URL + '/session',
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': process.env.CROWD_APP_BASIC_AUTH
+		},
+		method:"POST",
+		json: true,
+		body: {
+			"username" : netid,
+			"password" : pass,
+			"validation-factors" : {
+			"validationFactors" : [
+					{
+						"name" : "remote_address",
+						"value" : "127.0.0.1"
+					}
+				]
+			}
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		if(error)
+			console.log("Error: " + error);
+		if(body["reason"])
+			console.log("ISSUE: " + body["reason"]);
+		if(!body["token"])
+			res.status(422).end();
+		else
+			res.json(body).end();
+	}
+
+	request(options, callback);
+
+});
+
+
+app.post('/token/validate', function(req,res){
+
+	var token = req.body.token;
+
+	var options = {
+		uri: process.env.CROWD_URL + '/session/' + token,
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': process.env.CROWD_APP_BASIC_AUTH
+		},
+		method:"POST",
+		json: true,
+		body: {
+		"validationFactors" : [
+				{
+					"name" : "remote_address",
+					"value" : "127.0.0.1"
+				}
+			]
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		if(error)
+			console.log("Error: " + error);
+		if(body["reason"])
+			console.log("ISSUE: " + body["reason"]);
+		if(!body["token"])
+			res.status(422).end();
+		else
+			res.json(body).end();
+	}
+
+	request(options, callback);
+
+});
 
 app.listen(PORT);
 console.log('GROOT USER SERVICES is live on port ' + PORT + "!");

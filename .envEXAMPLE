@@ -2,3 +2,7 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASS=pass
 DB_NAME=acm_users
+CROWD_URL=crowd_url
+CROWD_APP_NAME=appname
+CROWD_APP_PASS=app pass
+CROWD_APP_BASIC_AUTH=basic auth
