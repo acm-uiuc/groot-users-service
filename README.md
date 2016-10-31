@@ -28,10 +28,21 @@ POST `/newUser`
   `{netid, first_name, last_name, uin)`
   
   Creates a new pre user based off the information posted to this endpoint
-  
-    
+      
 POST `/user/paid`
   
   `{"netid":netid}`
   
   Moves a user to the active members list.
+
+POST `/token'
+
+  `{"netid":netid, "password":password}`
+  
+  Returns a token for the given user
+  
+  POST `/token/validate'
+
+  `{"token":token}`
+  
+  Validates the given token and returns the user's NETID
