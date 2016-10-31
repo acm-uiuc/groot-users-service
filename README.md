@@ -35,13 +35,13 @@ POST `/user/paid`
   
   Moves a user to the active members list.
 
-POST `/token'
+POST `/token`
 
   `{"netid":netid, "password":password}`
   
   Returns a token for the given user
   
-  POST `/token/validate'
+  POST `/token/validate`
 
   `{"token":token}`
   
