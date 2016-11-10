@@ -15,50 +15,222 @@ require('request-debug')(request);
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
-  host     : process.env.DB_HOST,
-  user     : process.env.DB_USER,
-  password : process.env.DB_PASS,
-  database : process.env.DB_NAME
+  host     : process.env.GROOT_DB_HOST,
+  user     : process.env.GROOT_DB_USER,
+  password : process.env.GROOT_DB_PASS,
+  database : process.env.GROOT_DB_NAME
 });
 
 
-app.get('/users/pre', function (req, res) {
-	console.log("GET /users/pre");
-	connection.query('SELECT * FROM pre_users', function(err, rows) {
-		console.log(err);
-		console.log(rows);
-		return res.json(rows);
-	});
+app.post('/users/pre', function (req, res) {
+	console.log("POST /users/pre");
+
+	var token = req.body.token;
+
+	var options = {
+		url: process.env.TOKEN_VALIDATION_URL,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		console.log("----------------------------------------------------------------------------------------------------");
+		console.log("BODY: " + body);
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			connection.query('SELECT * FROM pre_users', function(err, rows) {
+				console.log("Returning pre_users row queries")
+				if(err)
+					console.log(err);
+				console.log(rows);
+				return res.json(rows);
+			});
+		}
+	}
+
+	request(options, callback);
+
 });
+/*{
+	"authToken":token
+}*/
 
 app.get('/users/current', function (req, res) {
-	connection.query('SELECT * FROM user_info', function(err, rows) {
-		console.log(rows);
-		return res.json(rows);
-	});
+	
+	var token = req.body.token;
+
+	var options = {
+		url: process.env.TOKEN_VALIDATION_URL,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		console.log("----------------------------------------------------------------------------------------------------");
+		console.log("BODY: " + body);
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			connection.query('SELECT * FROM user_info', function(err, rows) {
+				console.log(rows);
+				return res.json(rows);
+			});
+		}
+	}
+
+	request(options, callback);
+
+	// connection.query('SELECT * FROM user_info', function(err, rows) {
+	// 	console.log(rows);
+	// 	return res.json(rows);
+	// });
 });
 
 app.get('/users/:netid', function(req, res){
-	console.log("NETID: " + req.params["netid"]);
-	var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-	connection.query(sql, function(err, rows) {
-		if (err) throw err;
-		console.log(rows);
-		return res.json(rows);
-	});
+
+	var token = req.body.token;
+
+	var options = {
+		url: process.env.TOKEN_VALIDATION_URL,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		console.log("----------------------------------------------------------------------------------------------------");
+		console.log("BODY: " + body);
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			console.log("NETID: " + req.params["netid"]);
+			var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+			connection.query(sql, function(err, rows) {
+				if (err) throw err;
+				console.log(rows);
+				return res.json(rows);
+			});
+		}
+	}
+
+	request(options, callback);
+	// console.log("NETID: " + req.params["netid"]);
+	// var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+	// connection.query(sql, function(err, rows) {
+	// 	if (err) throw err;
+	// 	console.log(rows);
+	// 	return res.json(rows);
+	// });
 });
 
 app.get('/users/:netid/isMember', function(req, res){
-	console.log("NETID: " + req.params["netid"]);
-	var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-	connection.query(sql, function(err, rows) {
-		if (err) throw err;
-		console.log("ROWS: " + rows);
-		console.log(rows.netid);
-		if(rows != "")
-			return res.json({"isMember" : "true"});
-		return res.json({"isMember" : "false"});
-	});
+	var token = req.body.token;
+
+	var options = {
+		url: process.env.TOKEN_VALIDATION_URL,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		console.log("----------------------------------------------------------------------------------------------------");
+		console.log("BODY: " + body);
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			console.log("NETID: " + req.params["netid"]);
+			var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+			connection.query(sql, function(err, rows) {
+				if (err) throw err;
+				console.log("ROWS: " + rows);
+				console.log(rows.netid);
+				if(rows != "")
+					return res.json({"isMember" : "true"});
+				return res.json({"isMember" : "false"});
+			});
+		}
+	}
+
+	request(options, callback);
+
+	// console.log("NETID: " + req.params["netid"]);
+	// var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+	// connection.query(sql, function(err, rows) {
+	// 	if (err) throw err;
+	// 	console.log("ROWS: " + rows);
+	// 	console.log(rows.netid);
+	// 	if(rows != "")
+	// 		return res.json({"isMember" : "true"});
+	// 	return res.json({"isMember" : "false"});
+	// });
 });
 
 
@@ -177,6 +349,7 @@ app.post('/token', function(req, res){
 
 
 app.post('/token/validate', function(req,res){
+	console.log("POST /token/validate");
 
 	var token = req.body.token;
 
@@ -217,4 +390,16 @@ app.post('/token/validate', function(req,res){
 
 app.listen(PORT);
 console.log('GROOT USER SERVICES is live on port ' + PORT + "!");
-// console.log(users);
+
+/*
+debug console.log() statements
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+*/

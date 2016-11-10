@@ -6,11 +6,10 @@ var connection = mysql.createConnection({
   database : process.env.DB_NAME
 });
 
-
 connection.connect();
 
 /*
-CREATE TABLE `backup_user` (
+CREATE TABLE `groot_beta_all_users` (
   `uid` int(10) unsigned NOT NULL DEFAULT '0',
   `netid` varchar(8) DEFAULT NULL,
   `first_name` varchar(15) NOT NULL DEFAULT '',
@@ -24,6 +23,21 @@ CREATE TABLE `backup_user` (
   UNIQUE KEY `uin` (`uin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 */
+
+
+/*
+CREATE TABLE `groot_beta_pre_users` (
+  `netid` varchar(8) DEFAULT NULL,
+  `first_name` varchar(15) NOT NULL DEFAULT '',
+  `last_name` varchar(30) NOT NULL DEFAULT '',
+  `uin` varchar(9) DEFAULT NULL,
+  PRIMARY KEY (`uin`),
+  UNIQUE KEY `netid` (`netid`),
+  UNIQUE KEY `uin` (`uin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+*/
+
+
 
 var fs = require("fs");
 var contents = fs.readFileSync("users.json");
@@ -44,7 +58,5 @@ for(var i = 1; i < users.length; i++)
 	  console.log('Rows: ', rows);
 	});
 }
-
-
 
 connection.end();
