@@ -21,204 +21,105 @@ var connection = mysql.createConnection({
   database : process.env.GROOT_DB_NAME
 });
 
+function validateToken(token, req, res, nextSteps)
+{
+	var options = {
+		url: process.env.TOKEN_VALIDATION_URL,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			nextSteps(req, res);
+		}
+	}
+	request(options, callback);
+}
+
+
 
 app.post('/users/pre', function (req, res) {
 	console.log("POST /users/pre");
-
-	var token = req.body.token;
-
-	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
-		method:"POST",
-		json: true,
-		body: {
-			"token":token
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(422).end();//the token could not be validated
-		}
-		else
-		{
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-			
-			connection.query('SELECT * FROM groot_beta_pre_users', function(err, rows) {
-				console.log("Returning pre_users row queries")
-				if(err)
-					console.log(err);
-				console.log(rows);
-				return res.json(rows);
-			});
-		}
-	}
-
-	request(options, callback);
-
+	validateToken(req.body.token, req, res, getPreUsers);
 });
-/*{
-	"authToken":token
-}*/
+
+function getPreUsers(req, res)
+{
+	connection.query('SELECT * FROM groot_beta_pre_users', function(err, rows) {
+		console.log("Returning pre_users row queries")
+		if(err)
+			console.log(err);
+		console.log(rows);
+		return res.json(rows);
+	});
+}
 
 app.post('/users/current', function (req, res) {
-	
-	var token = req.body.token;
-
-	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
-		method:"POST",
-		json: true,
-		body: {
-			"token":token
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(422).end();//the token could not be validated
-		}
-		else
-		{
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-			
-			connection.query('SELECT * FROM groot_beta_all_users', function(err, rows) {
-				console.log(rows);
-				return res.json(rows);
-			});
-		}
-	}
-
-	request(options, callback);
-
-	// connection.query('SELECT * FROM user_info', function(err, rows) {
-	// 	console.log(rows);
-	// 	return res.json(rows);
-	// });
+	validateToken(req.body.token, req, res, getCurrentUsers);
 });
+
+function getCurrentUsers(req, res)
+{
+	connection.query('SELECT * FROM groot_beta_all_users', function(err, rows) {
+		console.log(rows);
+		return res.json(rows);
+	});
+}
 
 app.post('/users/:netid', function(req, res){
-
-	var token = req.body.token;
-
-	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
-		method:"POST",
-		json: true,
-		body: {
-			"token":token
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(422).end();//the token could not be validated
-		}
-		else
-		{
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-			
-			console.log("NETID: " + req.params["netid"]);
-			var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-			connection.query(sql, function(err, rows) {
-				if (err) throw err;
-				console.log(rows);
-				return res.json(rows);
-			});
-		}
-	}
-
-	request(options, callback);
-	// console.log("NETID: " + req.params["netid"]);
-	// var sql = "SELECT * FROM `user_info` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-	// connection.query(sql, function(err, rows) {
-	// 	if (err) throw err;
-	// 	console.log(rows);
-	// 	return res.json(rows);
-	// });
+	validateToken(req.body.token, req, res, getMemberInfo);
 });
+
+function getMemberInfo(req, res)
+{
+	console.log("NETID: " + req.params["netid"]);
+	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+	connection.query(sql, function(err, rows) {
+		if (err) throw err;
+		console.log(rows);
+		return res.json(rows);
+	});
+}
 
 app.post('/users/:netid/isMember', function(req, res){
-	var token = req.body.token;
-
-	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
-		method:"POST",
-		json: true,
-		body: {
-			"token":token
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(422).end();//the token could not be validated
-		}
-		else
-		{
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-			
-			console.log("NETID: " + req.params["netid"]);
-			var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-			connection.query(sql, function(err, rows) {
-				if (err) throw err;
-				console.log("ROWS: " + rows);
-				console.log(rows.netid);
-				if(rows != "")
-					return res.json({"isMember" : "true"});
-				return res.json({"isMember" : "false"});
-			});
-		}
-	}
-
-	request(options, callback);
-
+	validateToken(req.body.token, req, res, getIsMember);
 });
+
+function getIsMember(req, res)
+{
+	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+	connection.query(sql, function(err, rows) {
+		if (err) throw err;
+		// console.log("ROWS: " + rows);
+		// console.log(rows.netid);
+		if(rows != "")
+			return res.json({"isMember" : "true"});
+		return res.json({"isMember" : "false"});
+	});
+}
 
 
 app.post('/newUser', function(req, res) {
-
-
 	console.log(req.body);
 	var sql = "INSERT INTO groot_beta_pre_users(netid, first_name, last_name, uin) " + 
 							" VALUES (?, ?, ?, ?);";
@@ -230,94 +131,63 @@ app.post('/newUser', function(req, res) {
 		console.log('Rows: ', rows);
 		res.status(200).end();
 	});
-
 	/*
 		netid, UIN, first name, last name
 	*/
 });
 
 app.post('/user/paid', function(req, res) {
-	
-	var token = req.body.token;
+	validateToken(req.body.token, req, res, userPaid);
+});
 
-	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
-		method:"POST",
-		json: true,
-		body: {
-			"token":token
-		}
-	};
+function userPaid(req, res)
+{
+	console.log("NETID: " + req.body.netid);
+	var sql = "SELECT * FROM `groot_beta_pre_users` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
+	console.log("SQL: " + sql);
+	connection.query(sql, function(err, rows) {
 
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(422).end();//the token could not be validated
-		}
+		if(rows === [])
+			return res.status(400).end();
 		else
 		{
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-			request(options, callback);
+			var results = JSON.stringify(rows);
+			console.log(rows);
+			console.log(rows["RowDataPacket"]);
+			console.log(results);
+			var r = JSON.parse(results);
+			console.log(r[0]["netid"]);
 
-			console.log("NETID: " + req.body.netid);
-			var sql = "SELECT * FROM `groot_beta_pre_users` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
-			console.log("SQL: " + sql);
-			connection.query(sql, function(err, rows) {
+			var sqlInsert = "INSERT INTO groot_beta_all_users(netid, first_name, last_name, uin)" +
+			" VALUES ("+ mysql.escape(r[0]["netid"]) + ", " + mysql.escape(r[0]["first_name"]) + 
+			" , " + mysql.escape(r[0]["last_name"])+", " +mysql.escape(r[0]["uin"]) + ")";
 
-				if(rows === [])
-					return res.status(400).end();
+			connection.query(sqlInsert, function(err, rows) {
+				console.log("inserted");
+				console.log(err);
+				if(err)
+				{
+					return res.status(500).end();
+				}
 				else
 				{
-					console.log("hello");
-					var results = JSON.stringify(rows);
-					console.log(rows);
-					console.log(rows["RowDataPacket"]);
-					console.log(results);
-					var r = JSON.parse(results);
-					console.log(r[0]["netid"]);
-
-					var sqlInsert = "INSERT INTO groot_beta_all_users(netid, first_name, last_name, uin)" +
-					" VALUES ("+ mysql.escape(r[0]["netid"]) + ", " + mysql.escape(r[0]["first_name"]) + 
-					" , " + mysql.escape(r[0]["last_name"])+", " +mysql.escape(r[0]["uin"]) + ")";
-					connection.query(sqlInsert, function(err, rows) {
-						console.log("inserted");
-						console.log(err);
+					var deleteSQL = "DELETE from pre_users WHERE `netid`= " + mysql.escape(req.body.netid)
+					connection.query(deleteSQL, function(err, rows) {
+						console.log("deleted");
 						if(err)
 						{
-							return res.status(500).end();
+							console.log(err);
 						}
-						else
-						{
-							var deleteSQL = "DELETE from pre_users WHERE `netid`= " + mysql.escape(req.body.netid)
-							connection.query(deleteSQL, function(err, rows) {
-								console.log("deleted");
-								if(err)
-								{
-									console.log(err);
-								}
-								console.log(rows);
-							});
-						}	
+						console.log(rows);
 					});
-
-					return res.status(200).end();
-				}
+				}	
 			});
+
+			return res.status(200).end();
 		}
-	}
+	});
 
-	request(options, callback);
-
-});
+}
 
 app.post('/token', function(req, res){
 	// passing

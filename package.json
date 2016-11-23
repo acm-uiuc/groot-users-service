@@ -14,5 +14,13 @@
     "mysql": "^2.11.1",
     "request": "^2.76.0",
     "request-debug": "^0.2.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acm-uiuc/groot-users-service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/acm-uiuc/groot-users-service/issues"
+  },
+  "homepage": "https://github.com/acm-uiuc/groot-users-service#readme"
 }
