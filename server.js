@@ -1,5 +1,4 @@
-var path = require("path");
-require('dotenv').config({path: path.resolve(__dirname) + '/.env'});
+require('dotenv').config();
 
 const PORT = 8001;
 
@@ -41,8 +40,7 @@ app.post('/users/pre', function (req, res) {
 	{
 		if(!body || !body["token"])
 		{
-			res.status(420).end();//the token could not be validated
-			// Changed 422 to 420 cuz dank memes
+			res.status(422).end();//the token could not be validated
 		}
 		else
 		{
@@ -90,8 +88,7 @@ app.post('/users/current', function (req, res) {
 	{
 		if(!body || !body["token"])
 		{
-			res.status(420).end();//the token could not be validated
-			// Changed 422 to 420 cuz dank memes
+			res.status(422).end();//the token could not be validated
 		}
 		else
 		{
@@ -137,8 +134,7 @@ app.post('/users/:netid', function(req, res){
 	{
 		if(!body || !body["token"])
 		{
-			res.status(420).end();//the token could not be validated
-			// Changed 422 to 420 cuz dank memes
+			res.status(422).end();//the token could not be validated
 		}
 		else
 		{
@@ -188,8 +184,7 @@ app.post('/users/:netid/isMember', function(req, res){
 	{
 		if(!body || !body["token"])
 		{
-			res.status(420).end();//the token could not be validated
-			// Changed 422 to 420 cuz dank memes
+			res.status(422).end();//the token could not be validated
 		}
 		else
 		{
@@ -223,10 +218,11 @@ app.post('/users/:netid/isMember', function(req, res){
 
 app.post('/newUser', function(req, res) {
 
+
 	console.log(req.body);
 	var sql = "INSERT INTO groot_beta_pre_users(netid, first_name, last_name, uin) " + 
 							" VALUES (?, ?, ?, ?);";
-	var inserts = [req.body.netid, req.body.first_name, req.body.last_name, req.body.uin];
+	var inserts = [req.body.netid, req.body.firstName, req.body.lastName, req.body.uin];
 	sql = mysql.format(sql, inserts);
 	console.log("INSERT QUERY: " + sql);
 	connection.query(sql, function(err, rows, fields) {
@@ -241,7 +237,8 @@ app.post('/newUser', function(req, res) {
 });
 
 app.post('/user/paid', function(req, res) {
-		var token = req.body.token;
+	
+	var token = req.body.token;
 
 	var options = {
 		url: process.env.TOKEN_VALIDATION_URL,
@@ -256,8 +253,7 @@ app.post('/user/paid', function(req, res) {
 	{
 		if(!body || !body["token"])
 		{
-			res.status(420).end();//the token could not be validated
-			// Changed 422 to 420 cuz dank memes			
+			res.status(422).end();//the token could not be validated
 		}
 		else
 		{
@@ -270,7 +266,7 @@ app.post('/user/paid', function(req, res) {
 			// 	console.log("ISSUE: " + body["reason"]);
 			// else
 			//	res.json(body).end();
-				request(options, callback);
+			request(options, callback);
 
 			console.log("NETID: " + req.body.netid);
 			var sql = "SELECT * FROM `groot_beta_pre_users` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
@@ -358,10 +354,8 @@ app.post('/token', function(req, res){
 			console.log("Error: " + error);
 		if(body["reason"])
 			console.log("ISSUE: " + body["reason"]);
-		if(!body["token"]) {
-			res.status(420).end();
-			// Changed 422 to 420 cuz dank memes			
-		}
+		if(!body["token"])
+			res.status(422).end();
 		else
 			res.json(body).end();
 	}
@@ -401,10 +395,8 @@ app.post('/token/validate', function(req,res){
 			console.log("Error: " + error);
 		if(body["reason"])
 			console.log("ISSUE: " + body["reason"]);
-		if(!body["token"]) {
-			res.status(420).end();
-			// Changed 422 to 420 cuz dank memes			
-		}
+		if(!body["token"])
+			res.status(422).end();
 		else
 			res.json(body).end();
 	}
