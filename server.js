@@ -1,4 +1,5 @@
-require('dotenv').config();
+// require('dotenv').config();+
+require('dotenv').config({path: path.resolve(__dirname) + '/.env'});
 
 const PORT = 8001;
 
