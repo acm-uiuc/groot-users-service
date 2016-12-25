@@ -11,8 +11,8 @@ var path = require("path");
 require('dotenv').config({path: path.resolve(__dirname) + '/.env'});
 
 const PORT = 8001;
-const SERVICES_URL = 'http://localhost:8000'
-
+const SERVICES_URL = 'http://localhost:8000';
+const GROOT_ACCESS_TOKEN = process.env.GROOT_ACCESS_TOKEN || "TEMP_STRING";
 
 var express = require('express');
 var app = express();
@@ -42,7 +42,10 @@ function validateToken(token, req, res, nextSteps)
 		json: true,
 		body: {
 			"token":token
-		}
+		},
+		headers: {
+			"Authorization": GROOT_ACCESS_TOKEN
+		}, 
 	};
 
 	function callback(error, response, body)
@@ -77,7 +80,11 @@ function validateTokenAndUser(token, req, res, nextSteps)
 		json: true,
 		body: {
 			"token":token
-		}
+		},
+		headers: {
+			"Authorization": GROOT_ACCESS_TOKEN
+		}, 
+
 	};
 
 	function callback(error, response, body)
