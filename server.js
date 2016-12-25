@@ -1,7 +1,9 @@
-// require('dotenv').config();+
+var path = require("path");
 require('dotenv').config({path: path.resolve(__dirname) + '/.env'});
 
 const PORT = 8001;
+const SERVICES_URL = 'http://localhost:8000'
+
 
 var express = require('express');
 var app = express();
@@ -14,6 +16,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 var request = require('request');
 require('request-debug')(request);
 
+
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : process.env.GROOT_DB_HOST,
@@ -25,7 +28,7 @@ var connection = mysql.createConnection({
 function validateToken(token, req, res, nextSteps)
 {
 	var options = {
-		url: process.env.TOKEN_VALIDATION_URL,
+		url: `${SERVICES_URL}/session`,
 		method:"POST",
 		json: true,
 		body: {
@@ -52,6 +55,46 @@ function validateToken(token, req, res, nextSteps)
 			//	res.json(body).end();
 			
 			nextSteps(req, res);
+		}
+	}
+	request(options, callback);
+}
+
+function validateTokenAndUser(token, req, res, nextSteps)
+{
+	var options = {
+		url: `${SERVICES_URL}/session`,
+		method:"POST",
+		json: true,
+		body: {
+			"token":token
+		}
+	};
+
+	function callback(error, response, body)
+	{
+		if(!body || !body["token"])
+		{
+			res.status(422).end();//the token could not be validated
+		}
+		else
+		{
+			console.log("error: " + error);
+			console.log("Response: " + response);
+			console.log("Body: " + body);
+
+			// need to grab netid from here of requester
+			// probably body["user"]["name"]
+			// then make requests to groups service
+
+			// if(error)
+			// 	console.log("Error: " + error);
+			// if(body["reason"])
+			// 	console.log("ISSUE: " + body["reason"]);
+			// else
+			//	res.json(body).end();
+			
+			// nextSteps(req, res);
 		}
 	}
 	request(options, callback);
@@ -138,7 +181,7 @@ app.post('/newUser', function(req, res) {
 });
 
 app.post('/user/paid', function(req, res) {
-	validateToken(req.body.token, req, res, userPaid);
+	validateTokenAndUser(req.body.token, req, res, userPaid);
 });
 
 function userPaid(req, res)
@@ -190,104 +233,5 @@ function userPaid(req, res)
 
 }
 
-app.post('/token', function(req, res){
-	// passing
-	// netid, password
-	var netid = req.body.netid;
-	var pass = req.body.password;
-
-	var options = {
-		uri: process.env.CROWD_URL + '/session',
-		headers: {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-			'Authorization': process.env.CROWD_APP_BASIC_AUTH
-		},
-		method:"POST",
-		json: true,
-		body: {
-			"username" : netid,
-			"password" : pass,
-			"validation-factors" : {
-			"validationFactors" : [
-					{
-						"name" : "remote_address",
-						"value" : "127.0.0.1"
-					}
-				]
-			}
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(error)
-			console.log("Error: " + error);
-		if(body["reason"])
-			console.log("ISSUE: " + body["reason"]);
-		if(!body["token"])
-			res.status(422).end();
-		else
-			res.json(body).end();
-	}
-
-	request(options, callback);
-
-});
-
-
-app.post('/token/validate', function(req,res){
-	console.log("POST /token/validate");
-
-	var token = req.body.token;
-
-	var options = {
-		uri: process.env.CROWD_URL + '/session/' + token,
-		headers: {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-			'Authorization': process.env.CROWD_APP_BASIC_AUTH
-		},
-		method:"POST",
-		json: true,
-		body: {
-		"validationFactors" : [
-				{
-					"name" : "remote_address",
-					"value" : "127.0.0.1"
-				}
-			]
-		}
-	};
-
-	function callback(error, response, body)
-	{
-		if(error)
-			console.log("Error: " + error);
-		if(body["reason"])
-			console.log("ISSUE: " + body["reason"]);
-		if(!body["token"])
-			res.status(422).end();
-		else
-			res.json(body).end();
-	}
-
-	request(options, callback);
-
-});
-
 app.listen(PORT);
 console.log('GROOT USER SERVICES is live on port ' + PORT + "!");
-
-/*
-debug console.log() statements
-			console.log("error: " + error);
-			console.log("Response: " + response);
-			console.log("Body: " + body);
-			// if(error)
-			// 	console.log("Error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			// else
-			//	res.json(body).end();
-*/
