@@ -43,18 +43,6 @@ POST `/user/paid`
   
   Moves a user to the active members list.
 
-POST `/token`
-
-  `{"netid":netid, "password":password}`
-  
-  Returns a token for the given user
-  
-POST `/token/validate`
-
-  `{"token":token}`
-  
-  Validates the given token and returns the user's NETID
-
 ## License
 
 This project is licensed under the University of Illinois/NCSA Open Source License. For a full copy of this license take a look at the LICENSE file. 
