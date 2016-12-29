@@ -9,25 +9,25 @@ Additionally, you must rename ```.envEXAMPLE``` to ```.env```, and put in your c
 ###Endpoints for this User Service
 POST `/users/pre`
 
-  `{"authToken":token}`
+  `{"token":token}`
 
   Returns a JSON list of all pre members(members who have signed up but not registered)
   
 POST `/users/current`
 
-  `{"authToken":token}`
+  `{"token":token}`
 
   Returns a JSON list of all active members
 
 POST `/users/:netid`
 
-  `{"authToken":token}`
+  `{"token":token}`
 
   Returns a JSON list of the information of a specific member
 
 POST `/users/:netid/isMember`
 
-  `{"authToken":token}`
+  `{"token":token}`
   
   Returns either true or false if a specific person is an active member of ACM
   
@@ -39,7 +39,7 @@ POST `/newUser`
       
 POST `/user/paid`
   
-  `{"authToken":token, "netid":netid}`
+  `{"token":token, "netid":netid}`
   
   Moves a user to the active members list.
 
