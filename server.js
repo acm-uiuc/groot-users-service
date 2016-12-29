@@ -110,8 +110,6 @@ function validateTokenAndUser(token, req, res, nextSteps)
 	request(options, callback);
 }
 
-
-
 app.post('/users/pre', function (req, res) {
 	console.log("POST /users/pre");
 	validateToken(req.body.token, req, res, getPreUsers);
@@ -175,6 +173,8 @@ function getIsMember(req, res)
 
 app.post('/newUser', function(req, res) {
 	console.log(req.body);
+	//per https://github.com/mysqljs/mysql#escaping-query-values
+	// the following values are already escaped
 	var sql = "INSERT INTO groot_beta_pre_users(netid, first_name, last_name, uin) " + 
 							" VALUES (?, ?, ?, ?);";
 	var inserts = [req.body.netid, req.body.firstName, req.body.lastName, req.body.uin];
