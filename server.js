@@ -37,12 +37,9 @@ var connection = mysql.createConnection({
 function validateToken(token, req, res, nextSteps)
 {
 	var options = {
-		url: `${SERVICES_URL}/session`,
-		method:"POST",
+		url: `${SERVICES_URL}/session/` + token,
+		method:"GET",
 		json: true,
-		body: {
-			"token":token
-		},
 		headers: {
 			"Authorization": GROOT_ACCESS_TOKEN
 		}, 
@@ -75,12 +72,9 @@ function validateToken(token, req, res, nextSteps)
 function validateTokenAndUser(token, req, res, nextSteps)
 {
 	var options = {
-		url: `${SERVICES_URL}/session`,
-		method:"POST",
+		url: `${SERVICES_URL}/session` + token,
+		method:"GET",
 		json: true,
-		body: {
-			"token":token
-		},
 		headers: {
 			"Authorization": GROOT_ACCESS_TOKEN
 		}, 
