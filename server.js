@@ -110,6 +110,60 @@ function validateTokenAndUser(token, req, res, nextSteps)
 	request(options, callback);
 }
 
+//==========================================================================
+//NEED TO FINISH validateTokenAndUser() with the below functions
+//==========================================================================
+function checkIfAdmin(req, res, netid, nextSteps)
+{
+	var options = {
+		url: `${SERVICES_URL}/groups/committees/admin?isMember=${netid}`,
+		headers: {
+			"Authorization": GROOT_ACCESS_TOKEN
+		},
+		method:"GET"
+	};
+
+	function callback(error, response, body)
+	{
+		// if(error || !body)
+			// console.log("Error: " + error);
+		if(body && JSON.parse(body).isValid)
+		{
+			req.session.isAdmin = JSON.parse(body).isValid;
+			nextSteps(req, res);
+		
+		}
+		else
+			checkIfTop4(req, res, netid, nextSteps)
+
+	}
+	request(options, callback);
+}
+
+function checkIfTop4(req, res, netid, nextSteps)
+{
+	var options = {
+		url: `${SERVICES_URL}/groups/committees/Top4?isMember=${netid}`,
+		headers: {
+			"Authorization": GROOT_ACCESS_TOKEN
+		},
+		method:"GET"
+	};
+
+	function callback(error, response, body)
+	{
+		// if(error || !body)
+			// console.log("Error: " + error);
+		if(body && JSON.parse(body).isValid)
+		{
+			req.session.isAdmin = JSON.parse(body).isValid;
+		}		
+		nextSteps(req, res);
+
+	}
+	request(options, callback);
+}
+
 app.post('/users/pre', function (req, res) {
 	console.log("POST /users/pre");
 	validateToken(req.body.token, req, res, getPreUsers);
@@ -117,11 +171,11 @@ app.post('/users/pre', function (req, res) {
 
 function getPreUsers(req, res)
 {
-	connection.query('SELECT * FROM groot_beta_pre_users', function(err, rows) {
+	connection.query('SELECT * FROM intranet_premember ORDER BY created_at DESC', function(err, rows) {
 		console.log("Returning pre_users row queries")
 		if(err)
 			console.log(err);
-		console.log(rows);
+		// console.log(rows);
 		return res.json(rows);
 	});
 }
