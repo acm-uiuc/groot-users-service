@@ -245,55 +245,73 @@ app.post('/newUser', function(req, res) {
 });
 
 app.post('/user/paid', function(req, res) {
-	validateTokenAndUser(req.body.token, req, res, userPaid);
+	console.log("POST /user/paid");
+	console.log(req.body.token + "\t" + req.body.netid);
+	validateToken(req.body.token, req, res, userPaid);
 });
 
 function userPaid(req, res)
 {
+	console.log("userPaid()");
 	console.log("NETID: " + req.body.netid);
-	var sql = "SELECT * FROM `groot_beta_pre_users` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
+	var sql = "SELECT * FROM `intranet_premember` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
 	console.log("SQL: " + sql);
 	connection.query(sql, function(err, rows) {
-
+		console.log("ROWS:");
 		if(rows === [])
-			return res.status(400).end();
+			return res.status(500).end();
 		else
-		{
+		{	
 			var results = JSON.stringify(rows);
 			console.log(rows);
 			console.log(rows["RowDataPacket"]);
 			console.log(results);
 			var r = JSON.parse(results);
-			console.log(r[0]["netid"]);
+			if(r  && r[0] && r[0]["netid"])
+			{
+				console.log(r[0]["netid"]);
 
-			var sqlInsert = "INSERT INTO groot_beta_all_users(netid, first_name, last_name, uin)" +
-			" VALUES ("+ mysql.escape(r[0]["netid"]) + ", " + mysql.escape(r[0]["first_name"]) + 
-			" , " + mysql.escape(r[0]["last_name"])+", " +mysql.escape(r[0]["uin"]) + ")";
+				var sqlInsert = "INSERT INTO intranet_approved_member(netid, first_name, last_name, uin) " + 
+								" VALUES (?, ?, ?, ?);";
 
-			connection.query(sqlInsert, function(err, rows) {
-				console.log("inserted");
-				console.log(err);
-				if(err)
-				{
-					return res.status(500).end();
-				}
-				else
-				{
-					var deleteSQL = "DELETE from pre_users WHERE `netid`= " + mysql.escape(req.body.netid)
-					connection.query(deleteSQL, function(err, rows) {
-						console.log("deleted");
-						if(err)
-						{
-							console.log(err);
-						}
-						console.log(rows);
-					});
-				}	
-			});
+				// var sqlInsert = "INSERT INTO (netid, first_name, last_name, uin)" +
+				// " VALUES ("+ mysql.escape(r[0]["netid"]) + ", " + mysql.escape(r[0]["first_name"]) + 
+				// " , " + mysql.escape(r[0]["last_name"])+", " +mysql.escape(r[0]["uin"]) + ")";
+				
+				var inserts = [r[0]["netid"], r[0]["first_name"], r[0]["last_name"], r[0]["uin"]];
+				sqlInsert = mysql.format(sqlInsert, inserts);
 
-			return res.status(200).end();
+				connection.query(sqlInsert, function(err, rows) {
+					console.log("inserted");
+					// console.log(err);
+					if(err)
+					{
+						console.log(err);
+						return res.status(500).end();
+					}
+					else
+					{
+						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid);
+						connection.query(deleteSQL, function(err, rows) {
+							console.log("deleted");
+							if(err)
+							{
+								console.log(err);
+							}
+							console.log(rows);
+							return res.status(200).end();
+
+						});
+					}	
+				});
+			}
+			else
+				return res.status(500).end();
+
+
 		}
 	});
+
 
 }
 
