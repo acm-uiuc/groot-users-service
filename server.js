@@ -229,9 +229,9 @@ app.post('/newUser', function(req, res) {
 	console.log(req.body);
 	//per https://github.com/mysqljs/mysql#escaping-query-values
 	// the following values are already escaped
-	var sql = "INSERT INTO groot_beta_pre_users(netid, first_name, last_name, uin) " + 
+	var sql = "INSERT INTO groot_beta.intranet_premember(netid, first_name, last_name, uin) " + 
 							" VALUES (?, ?, ?, ?);";
-	var inserts = [req.body.netid, req.body.firstName, req.body.lastName, req.body.uin];
+	var inserts = [req.body.netid, req.body.first_name, req.body.last_name, req.body.uin];
 	sql = mysql.format(sql, inserts);
 	console.log("INSERT QUERY: " + sql);
 	connection.query(sql, function(err, rows, fields) {
