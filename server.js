@@ -175,7 +175,6 @@ app.post('/users/pre', function (req, res) {
 function getPreUsers(req, res)
 {
 	connection.query('SELECT * FROM intranet_premember ORDER BY created_at DESC', function(err, rows) {
-		console.log("Returning pre_users row queries")
 		if(err)
 			console.log(err);
 		return res.json(rows);
