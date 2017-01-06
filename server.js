@@ -156,6 +156,7 @@ function getPreUsers(req, res){
 	connection.query('SELECT * FROM intranet_premember ORDER BY created_at DESC', function(err, rows) {
 		if(err){
 			console.log(err);
+			return res.status(500).send({"error" : err.code});
 		}
 		return res.json(rows);
 	});
@@ -169,6 +170,7 @@ function getCurrentUsers(req, res){
 	connection.query('SELECT * FROM groot_beta_all_users', function(err, rows) {
 		if(err){
 			console.log(err);
+			return res.status(500).send({"error" : err.code});
 		}
 		return res.json(rows);
 	});
@@ -183,6 +185,7 @@ function getMemberInfo(req, res){
 	connection.query(sql, function(err, rows) {
 		if(err){
 			console.log(err);
+			return res.status(500).send({"error" : err.code});
 		}
 		return res.json(rows);
 	});
@@ -197,6 +200,7 @@ function getIsMember(req, res){
 	connection.query(sql, function(err, rows) {
 		if(err){
 			console.log(err);
+			return res.status(500).send({"error" : err.code});
 		}
 		if(rows != "")
 			return res.json({"isMember" : "true"});
@@ -219,7 +223,7 @@ app.post('/newUser', function(req, res) {
 	connection.query(sql, function(err, rows, fields) {
 		if(err){
 			console.log(err);
-			return res.status(500).end();
+			return res.status(500).send({"error" : err.code});
 		}
 		res.status(200).end();
 	});
@@ -233,8 +237,9 @@ app.post('/user/paid', function(req, res) {
 function userPaid(req, res){
 	var sql = "SELECT * FROM `intranet_premember` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
 	connection.query(sql, function(err, rows) {
-		if(rows === [])
-			return res.status(500).end();
+		if(rows === []){
+			return res.status(500).send({"error":"netid not found"});
+		}
 		else{	
 			var results = JSON.stringify(rows);
 			var r = JSON.parse(results);
@@ -246,26 +251,26 @@ function userPaid(req, res){
 				sqlInsert = mysql.format(sqlInsert, inserts);
 
 				connection.query(sqlInsert, function(err, rows) {
-					if(err){
-						console.log(err);
-						return res.status(500).end();
-					}
+				if(err){
+					console.log(err);
+					return res.status(500).send({"error" : err.code});
+				}
 					else{
 						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid);
 						connection.query(deleteSQL, function(err, rows) {
 							if(err){
 								console.log(err);
+								return res.status(500).send({"error" : err.code});
 							}
 							console.log("added member " + mysql.escape(req.body.netid) + "to intranet_approved_member table")
 							return res.status(200).end();
-
 						});
 					}	
 				});
 			}
 			else{
 				console.log("user does not exist in intranet_premember,  netid: " + mysql.escape(req.body.netid) + ", returning a 500 server error");
-				return res.status(500).end();
+				return res.status(500).send("error":"User does not exist.");
 			}
 		}
 	});
