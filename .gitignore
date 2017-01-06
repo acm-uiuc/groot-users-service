@@ -1,6 +1,4 @@
-env.env
 .env
 .DS_Store
 node_modules
-yarn.lock
 npm-debug.log

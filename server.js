@@ -34,8 +34,7 @@ var connection = mysql.createConnection({
   database : process.env.GROOT_DB_NAME
 });
 
-function validateToken(token, req, res, nextSteps)
-{
+function validateToken(token, req, res, nextSteps){
 	var options = {
 		url: `${SERVICES_URL}/session/` + token,
 		method:"GET",
@@ -47,25 +46,20 @@ function validateToken(token, req, res, nextSteps)
 
 	function callback(error, response, body)
 	{
-		if(!body || !body["token"])
-		{
-			res.status(401).end();//the token could not be validated
+		if(!body || !body["token"]){
+			res.status(401).send({"error":"The token could not be validated."});
 		}
-		else
-		{
-			if(error)
+		else{
+			if(error){
 				console.log("error: " + error);
-			// if(body["reason"])
-			// 	console.log("ISSUE: " + body["reason"]);
-			
+			}
 			nextSteps(req, res);
 		}
 	}
 	request(options, callback);
 }
 
-function validateTokenAndUser(token, req, res, nextSteps)
-{
+function validateTokenAndUser(token, req, res, nextSteps){
 	var options = {
 		url: `${SERVICES_URL}/session/` + token,
 		method:"GET",
@@ -74,40 +68,32 @@ function validateTokenAndUser(token, req, res, nextSteps)
 			"Authorization": GROOT_ACCESS_TOKEN
 		}, 
 	};
-	function callback(error, response, body)
-	{
-		if(!body || !body["token"])
-		{
-			res.status(401).end();//the token could not be validated
+
+	function callback(error, response, body){
+		if(!body || !body["token"]){
+			res.status(401).send({"error":"The token could not be validated."});
 		}
-		else
-		{
-			if(error)
+		else{
+			if(error){
 				console.log("Error: " + error);
-			if(body["reason"])
+			}
+			if(body["reason"]){
 				console.log("ISSUE: " + body["reason"]);
+			}
 			var netid = body["user"]["name"];
 
 			checkIfAdmin(req, res, netid, function(isAdmin) {
-				if(isAdmin)
-				{
-					// console.log("IS ADMIN");
+				if(isAdmin){
 					nextSteps(req, res);
 				}
-				else
-				{
-					// console.log("IS NOT ADMIN");
+				else{
 					checkIfTop4(req, res, netid, function(isTop4) {
-						if(isTop4)
-						{
-							// console.log("IS TOP4");
+						if(isTop4){
 							nextSteps(req, res);
 						}
 						else{
-							// console.log("IS NOT T4");
-							res.status(401).end();//the token could not be validated
+							res.status(401).send({"error":"The user does not have permissions to do perform this action."});
 						}
-
 					});
 				}
 			});		
@@ -116,11 +102,7 @@ function validateTokenAndUser(token, req, res, nextSteps)
 	request(options, callback);
 }
 
-//==========================================================================
-//NEED TO FINISH validateTokenAndUser() with the below functions
-//==========================================================================
-function checkIfAdmin(req, res, netid, nextSteps)
-{
+function checkIfAdmin(req, res, netid, nextSteps){
 	var options = {
 		url: `${SERVICES_URL}/groups/committees/admin?isMember=${netid}`,
 		headers: {
@@ -129,22 +111,21 @@ function checkIfAdmin(req, res, netid, nextSteps)
 		method:"GET"
 	};
 
-	function callback(error, response, body)
-	{
-		if(error)
+	function callback(error, response, body){
+		if(error){
 			console.log("Error: " + error);
-		if(body && JSON.parse(body).isValid === "true")
-		{
-			nextSteps(true);	
 		}
-		else
+		if(body && JSON.parse(body).isValid === "true"){
+			nextSteps(true);
+		}
+		else{
 			nextSteps(false);
+		}
 	}
 	request(options, callback);
 }
 
-function checkIfTop4(req, res, netid, nextSteps)
-{
+function checkIfTop4(req, res, netid, nextSteps){
 	var options = {
 		url: `${SERVICES_URL}/groups/committees/Top4?isMember=${netid}`,
 		headers: {
@@ -153,30 +134,29 @@ function checkIfTop4(req, res, netid, nextSteps)
 		method:"GET"
 	};
 
-	function callback(error, response, body)
-	{
-		if(error)
+	function callback(error, response, body){
+		if(error){
 			console.log("Error: " + error);
-		if(body && JSON.parse(body).isValid === "true")
-		{
+		}
+		if(body && JSON.parse(body).isValid === "true"){
 			nextSteps(true);	
 		}
-		else
+		else{
 			nextSteps(false);
+		}
 	}
 	request(options, callback);
 }
 
 app.post('/users/pre', function (req, res) {
-	// console.log("POST /users/pre");
 	validateToken(req.body.token, req, res, getPreUsers);
 });
 
-function getPreUsers(req, res)
-{
+function getPreUsers(req, res){
 	connection.query('SELECT * FROM intranet_premember ORDER BY created_at DESC', function(err, rows) {
-		if(err)
+		if(err){
 			console.log(err);
+		}
 		return res.json(rows);
 	});
 }
@@ -185,10 +165,11 @@ app.post('/users/current', function (req, res) {
 	validateToken(req.body.token, req, res, getCurrentUsers);
 });
 
-function getCurrentUsers(req, res)
-{
+function getCurrentUsers(req, res){
 	connection.query('SELECT * FROM groot_beta_all_users', function(err, rows) {
-		// console.log(rows);
+		if(err){
+			console.log(err);
+		}
 		return res.json(rows);
 	});
 }
@@ -197,11 +178,12 @@ app.post('/users/:netid', function(req, res){
 	validateToken(req.body.token, req, res, getMemberInfo);
 });
 
-function getMemberInfo(req, res)
-{
+function getMemberInfo(req, res){
 	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
 	connection.query(sql, function(err, rows) {
-		if (err) throw err;
+		if(err){
+			console.log(err);
+		}
 		return res.json(rows);
 	});
 }
@@ -210,11 +192,12 @@ app.post('/users/:netid/isMember', function(req, res){
 	validateToken(req.body.token, req, res, getIsMember);
 });
 
-function getIsMember(req, res)
-{
+function getIsMember(req, res){
 	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
 	connection.query(sql, function(err, rows) {
-		if (err) throw err;
+		if(err){
+			console.log(err);
+		}
 		if(rows != "")
 			return res.json({"isMember" : "true"});
 		return res.json({"isMember" : "false"});
@@ -223,48 +206,39 @@ function getIsMember(req, res)
 
 
 app.post('/newUser', function(req, res) {
-	// console.log("POST /newUser");
-
 	// per https://github.com/mysqljs/mysql#escaping-query-values, the following values are already escaped
+
+	if(!req.body || !req.body.netid || !req.body.first_name || !req.body.last_name || !req.body.uin){
+		return res.status(400).send({"error":"The client did not send the necessary parameters."});
+	}
+
 	var sql = "INSERT INTO groot_beta.intranet_premember(netid, first_name, last_name, uin) " + 
 							" VALUES (?, ?, ?, ?);";
 	var inserts = [req.body.netid, req.body.first_name, req.body.last_name, req.body.uin];
 	sql = mysql.format(sql, inserts);
-	// console.log("INSERT QUERY: " + sql);
 	connection.query(sql, function(err, rows, fields) {
-		if (err) throw err;
+		if(err){
+			console.log(err);
+			return res.status(500).end();
+		}
 		res.status(200).end();
 	});
 
 });
 
 app.post('/user/paid', function(req, res) {
-	// console.log("POST /user/paid");
-	// console.log(req.body.token + "\t" + req.body.netid);
 	validateTokenAndUser(req.body.token, req, res, userPaid);
 });
 
-function userPaid(req, res)
-{
-	// console.log("userPaid()");
-	// console.log("NETID: " + req.body.netid);
+function userPaid(req, res){
 	var sql = "SELECT * FROM `intranet_premember` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
-	// console.log("SQL: " + sql);
 	connection.query(sql, function(err, rows) {
-		// console.log("ROWS:");
 		if(rows === [])
 			return res.status(500).end();
-		else
-		{	
+		else{	
 			var results = JSON.stringify(rows);
-			// console.log(rows);
-			// console.log(rows["RowDataPacket"]);
-			// console.log(results);
 			var r = JSON.parse(results);
-			if(r  && r[0] && r[0]["netid"])
-			{
-				// console.log(r[0]["netid"]);
-
+			if(r  && r[0] && r[0]["netid"]){
 				var sqlInsert = "INSERT INTO intranet_approved_member(netid, first_name, last_name, uin) " + 
 								" VALUES (?, ?, ?, ?);";
 				
@@ -272,22 +246,16 @@ function userPaid(req, res)
 				sqlInsert = mysql.format(sqlInsert, inserts);
 
 				connection.query(sqlInsert, function(err, rows) {
-					// console.log(err);
-					if(err)
-					{
+					if(err){
 						console.log(err);
 						return res.status(500).end();
 					}
-					else
-					{
+					else{
 						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid);
 						connection.query(deleteSQL, function(err, rows) {
-							// console.log("deleted");
-							if(err)
-							{
+							if(err){
 								console.log(err);
 							}
-							// console.log(rows);
 							console.log("added member " + mysql.escape(req.body.netid) + "to intranet_approved_member table")
 							return res.status(200).end();
 
@@ -295,15 +263,12 @@ function userPaid(req, res)
 					}	
 				});
 			}
-			else
-			{
+			else{
 				console.log("user does not exist in intranet_premember,  netid: " + mysql.escape(req.body.netid) + ", returning a 500 server error");
 				return res.status(500).end();
 			}
 		}
 	});
-
-
 }
 
 app.listen(PORT);
