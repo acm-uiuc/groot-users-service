@@ -3,7 +3,7 @@ Users Services for Groot
 
 To use,``` npm install ``` and ```node server.js```
 
-Additionally, you must rename ```.envEXAMPLE``` to ```.env```, and put in your credentials in the ```.env``` file
+Additionally, you must rename ```example.env``` to ```.env```, and put in your credentials in the ```.env``` file
 
 ---
 ###Endpoints for this User Service
