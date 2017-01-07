@@ -270,7 +270,7 @@ function userPaid(req, res){
 			}
 			else{
 				console.log("user does not exist in intranet_premember,  netid: " + mysql.escape(req.body.netid) + ", returning a 500 server error");
-				return res.status(500).send("error":"User does not exist.");
+				return res.status(500).send({"error":"User does not exist."});
 			}
 		}
 	});
