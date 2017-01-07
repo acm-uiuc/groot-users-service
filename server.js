@@ -176,6 +176,72 @@ function getCurrentUsers(req, res){
 	});
 }
 
+app.post('/users/paid', function(req, res) {
+	validateTokenAndUser(req.body.token, req, res, userPaid);
+});
+
+function userPaid(req, res){
+	var sql = "SELECT * FROM `intranet_premember` WHERE `netid` = " + mysql.escape(req.body.netid) + " LIMIT 1";
+	connection.query(sql, function(err, rows) {
+		if(rows === []){
+			return res.status(500).send({"error":"netid not found"});
+		}
+		else{	
+			var results = JSON.stringify(rows);
+			var r = JSON.parse(results);
+			if(r  && r[0] && r[0]["netid"]){
+				var sqlInsert = "INSERT INTO intranet_approved_member(netid, first_name, last_name, uin) " + 
+								" VALUES (?, ?, ?, ?);";
+				
+				var inserts = [r[0]["netid"], r[0]["first_name"], r[0]["last_name"], r[0]["uin"]];
+				sqlInsert = mysql.format(sqlInsert, inserts);
+
+				connection.query(sqlInsert, function(err, rows) {
+				if(err){
+					console.log(err);
+					return res.status(500).send({"error" : err.code});
+				}
+					else{
+						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid) + " LIMIT 1";
+						connection.query(deleteSQL, function(err, rows) {
+							if(err){
+								console.log(err);
+								return res.status(500).send({"error" : err.code});
+							}
+							console.log("added member " + mysql.escape(req.body.netid) + "to intranet_approved_member table")
+							return res.status(200).end();
+						});
+					}	
+				});
+			}
+			else{
+				console.log("user does not exist in intranet_premember,  netid: " + mysql.escape(req.body.netid) + ", returning a 500 server error");
+				return res.status(500).send({"error":"User does not exist."});
+			}
+		}
+	});
+}
+
+app.post('/users/newUser', function(req, res) {
+	// per https://github.com/mysqljs/mysql#escaping-query-values, the following values are already escaped
+
+	if(!req.body || !req.body.netid || !req.body.first_name || !req.body.last_name || !req.body.uin){
+		return res.status(400).send({"error":"The client did not send the necessary parameters."});
+	}
+
+	var sql = "INSERT INTO groot_beta.intranet_premember(netid, first_name, last_name, uin) " + 
+							" VALUES (?, ?, ?, ?);";
+	var inserts = [req.body.netid, req.body.first_name, req.body.last_name, req.body.uin];
+	sql = mysql.format(sql, inserts);
+	connection.query(sql, function(err, rows, fields) {
+		if(err){
+			console.log(err);
+			return res.status(500).send({"error" : err.code});
+		}
+		res.status(200).end();
+	});
+});
+
 app.post('/users/:netid', function(req, res){
 	validateToken(req.body.token, req, res, getMemberInfo);
 });
@@ -205,74 +271,6 @@ function getIsMember(req, res){
 		if(rows != "")
 			return res.json({"isMember" : "true"});
 		return res.json({"isMember" : "false"});
-	});
-}
-
-
-app.post('/newUser', function(req, res) {
-	// per https://github.com/mysqljs/mysql#escaping-query-values, the following values are already escaped
-
-	if(!req.body || !req.body.netid || !req.body.first_name || !req.body.last_name || !req.body.uin){
-		return res.status(400).send({"error":"The client did not send the necessary parameters."});
-	}
-
-	var sql = "INSERT INTO groot_beta.intranet_premember(netid, first_name, last_name, uin) " + 
-							" VALUES (?, ?, ?, ?);";
-	var inserts = [req.body.netid, req.body.first_name, req.body.last_name, req.body.uin];
-	sql = mysql.format(sql, inserts);
-	connection.query(sql, function(err, rows, fields) {
-		if(err){
-			console.log(err);
-			return res.status(500).send({"error" : err.code});
-		}
-		res.status(200).end();
-	});
-
-});
-
-app.post('/user/paid', function(req, res) {
-	validateTokenAndUser(req.body.token, req, res, userPaid);
-});
-
-function userPaid(req, res){
-	var sql = "SELECT * FROM `intranet_premember` WHERE `netid` = " + mysql.escape(req.body.netid) + "";
-	connection.query(sql, function(err, rows) {
-		if(rows === []){
-			return res.status(500).send({"error":"netid not found"});
-		}
-		else{	
-			var results = JSON.stringify(rows);
-			var r = JSON.parse(results);
-			if(r  && r[0] && r[0]["netid"]){
-				var sqlInsert = "INSERT INTO intranet_approved_member(netid, first_name, last_name, uin) " + 
-								" VALUES (?, ?, ?, ?);";
-				
-				var inserts = [r[0]["netid"], r[0]["first_name"], r[0]["last_name"], r[0]["uin"]];
-				sqlInsert = mysql.format(sqlInsert, inserts);
-
-				connection.query(sqlInsert, function(err, rows) {
-				if(err){
-					console.log(err);
-					return res.status(500).send({"error" : err.code});
-				}
-					else{
-						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid);
-						connection.query(deleteSQL, function(err, rows) {
-							if(err){
-								console.log(err);
-								return res.status(500).send({"error" : err.code});
-							}
-							console.log("added member " + mysql.escape(req.body.netid) + "to intranet_approved_member table")
-							return res.status(200).end();
-						});
-					}	
-				});
-			}
-			else{
-				console.log("user does not exist in intranet_premember,  netid: " + mysql.escape(req.body.netid) + ", returning a 500 server error");
-				return res.status(500).send({"error":"User does not exist."});
-			}
-		}
 	});
 }
 

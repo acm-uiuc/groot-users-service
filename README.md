@@ -19,6 +19,18 @@ POST `/users/current`
 
   Returns a JSON list of all active members
 
+POST `/users/paid`
+  
+  `{"token":token, "netid":netid}`
+  
+  Moves a user to the active members list.
+
+POST `/users/newUser`
+  
+  `{"netid":netid, "first_name":firstName, "last_name":lastName, "uin":uin}`
+  
+  Creates a new pre user based off the information posted to this endpoint
+
 POST `/users/:netid`
 
   `{"token":token}`
@@ -30,18 +42,7 @@ POST `/users/:netid/isMember`
   `{"token":token}`
   
   Returns either true or false if a specific person is an active member of ACM
-  
-POST `/newUser`
-  
-  `{"netid":netid, "first_name":firstName, "last_name":lastName, "uin":uin}`
-  
-  Creates a new pre user based off the information posted to this endpoint
       
-POST `/user/paid`
-  
-  `{"token":token, "netid":netid}`
-  
-  Moves a user to the active members list.
 
 ## License
 
