@@ -115,12 +115,7 @@ function checkIfAdmin(req, res, netid, nextSteps){
 		if(error){
 			console.log("Error: " + error);
 		}
-		if(body && JSON.parse(body).isValid === "true"){
-			nextSteps(true);
-		}
-		else{
-			nextSteps(false);
-		}
+		nextSteps(body && JSON.parse(body).isValid == "true");
 	}
 	request(options, callback);
 }
@@ -138,12 +133,7 @@ function checkIfTop4(req, res, netid, nextSteps){
 		if(error){
 			console.log("Error: " + error);
 		}
-		if(body && JSON.parse(body).isValid === "true"){
-			nextSteps(true);	
-		}
-		else{
-			nextSteps(false);
-		}
+		nextSteps(body && JSON.parse(body).isValid == "true");
 	}
 	request(options, callback);
 }
@@ -242,6 +232,23 @@ app.post('/users/newUser', function(req, res) {
 	});
 });
 
+app.post('/users/:netid/isMember', function(req, res){
+	validateToken(req.body.token, req, res, getIsMember);
+});
+
+function getIsMember(req, res){
+	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
+	connection.query(sql, function(err, rows) {
+		if(err){
+			console.log(err);
+			return res.status(500).send({"error" : err.code});
+		}
+		if(rows != "")
+			return res.json({"isMember" : true});
+		return res.json({"isMember" : false});
+	});
+}
+
 app.post('/users/:netid', function(req, res){
 	validateToken(req.body.token, req, res, getMemberInfo);
 });
@@ -257,22 +264,7 @@ function getMemberInfo(req, res){
 	});
 }
 
-app.post('/users/:netid/isMember', function(req, res){
-	validateToken(req.body.token, req, res, getIsMember);
-});
 
-function getIsMember(req, res){
-	var sql = "SELECT * FROM `groot_beta_all_users` WHERE `netid` = " + mysql.escape(req.params["netid"]) + "";
-	connection.query(sql, function(err, rows) {
-		if(err){
-			console.log(err);
-			return res.status(500).send({"error" : err.code});
-		}
-		if(rows != "")
-			return res.json({"isMember" : "true"});
-		return res.json({"isMember" : "false"});
-	});
-}
 
 app.listen(PORT);
 console.log('GROOT USER SERVICES is live on port ' + PORT + "!");
