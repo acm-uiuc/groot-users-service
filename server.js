@@ -115,7 +115,7 @@ function checkIfAdmin(req, res, netid, nextSteps){
 		if(error){
 			console.log("Error: " + error);
 		}
-		nextSteps(body && JSON.parse(body).isValid == "true");
+		nextSteps(body && JSON.parse(body).isValid);
 	}
 	request(options, callback);
 }
@@ -133,7 +133,7 @@ function checkIfTop4(req, res, netid, nextSteps){
 		if(error){
 			console.log("Error: " + error);
 		}
-		nextSteps(body && JSON.parse(body).isValid == "true");
+		nextSteps(body && JSON.parse(body).isValid);
 	}
 	request(options, callback);
 }
