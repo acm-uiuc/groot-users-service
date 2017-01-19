@@ -13,6 +13,14 @@ require('dotenv').config({path: path.resolve(__dirname) + '/.env'});
 const PORT = 8001;
 const SERVICES_URL = 'http://localhost:8000';
 const GROOT_ACCESS_TOKEN = process.env.GROOT_ACCESS_TOKEN || "TEMP_STRING";
+const nodemailer = require('nodemailer');
+const smtpConfig = {
+	host: 'express-smtp.cites.uiuc.edu',
+	port: 25,
+	secure: false,
+	ignoreTLS: true,
+};
+const transporter = nodemailer.createTransport(smtpConfig);
 
 var express = require('express');
 var app = express();
@@ -273,6 +281,28 @@ function getMemberInfo(req, res){
 	});
 }
 
+process.on('uncaughtException', function (err) {
+	if(process.env.EXCEPTION_FROM_EMAIL && process.env.EXCEPTION_TO_EMAIL){
+		var mailOptions = {
+			from: process.env.EXCEPTION_FROM_EMAIL, 
+			to: process.env.EXCEPTION_TO_EMAIL,  
+			subject: '[Groot-users-service] Fatal Error: ' + (new Date).toLocaleTimeString(), 
+			text: 'Uncaught Exception: Groot Users Service\n' + err.stack,
+		};
+
+		transporter.sendMail(mailOptions, function(error, info){
+			if(error){
+				console.log(error);
+			}else{
+				console.log('Message sent: ' + info.response);
+			}
+		console.error((new Date).toLocaleTimeString() + ' uncaughtException:', err.message)
+		console.error(err.stack)
+		process.exit(1);
+
+		});
+	}
+});
 
 
 app.listen(PORT);
