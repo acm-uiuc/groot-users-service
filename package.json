@@ -13,6 +13,7 @@
     "express": "^4.14.0",
     "express-winston": "^2.1.2",
     "mysql": "^2.11.1",
+    "nodemailer": "^2.7.0",
     "path": "^0.12.7",
     "request": "^2.76.0",
     "request-debug": "^0.2.0",
