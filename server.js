@@ -209,7 +209,7 @@ function userPaid(req, res){
 					return res.status(500).send({"error" : err.code});
 				}
 					else{
-						var deleteSQL = "DELETE from intranet_premember WHERE `netid`= " + mysql.escape(req.body.netid) + " LIMIT 1";
+						var deleteSQL = "DELETE from `intranet_premember` WHERE `netid`= " + mysql.escape(req.body.netid) + " LIMIT 1";
 						connection.query(deleteSQL, function(err, rows) {
 							if(err){
 								console.log(err);
@@ -245,7 +245,7 @@ app.post('/users/newUser', function(req, res) {
 			console.log(err);
 			return res.status(500).send({"error" : err.code});
 		}
-		res.status(200).end();
+		res.json({"success": "Added new premember"});
 	});
 });
 
