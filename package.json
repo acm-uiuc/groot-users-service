@@ -2,6 +2,8 @@
   "name": "groot-user-service",
   "version": "1.0.0",
   "description": "A User service for groot",
+  "author": "Groot Development Team <acm@illinois.edu>",
+  "license": "NCSA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
