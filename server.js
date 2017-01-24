@@ -280,7 +280,7 @@ function getMemberInfo(req, res){
 		return res.json(rows);
 	});
 }
-
+/*
 process.on('uncaughtException', function (err) {
 	if(process.env.EXCEPTION_FROM_EMAIL && process.env.EXCEPTION_TO_EMAIL){
 		var mailOptions = {
@@ -303,7 +303,7 @@ process.on('uncaughtException', function (err) {
 		});
 	}
 });
-
+*/
 
 app.listen(PORT);
 console.log('GROOT USER SERVICES is live on port ' + PORT + "!");
