@@ -1,48 +1,62 @@
-# groot-users-service
-Users Services for Groot
+# Groot Users Service
 
-To use,``` npm install ``` and ```node server.js```
+## Installing MySQL
+```sh
+brew install mysql
+```
 
-Additionally, you must rename ```example.env``` to ```.env```, and put in your credentials in the ```.env``` file
+## Migrate DB after model alteration (clears all data)
+```
+rake db:migrate
+```
 
----
-###Endpoints for this User Service
-POST `/users/pre`
+## Create secrets.yaml and database.yaml
 
-  `{"token":token}`
+```
+cp secrets.yaml.template secrets.yaml
+cp database.yaml.template database.yaml
+```
 
-  Returns a JSON list of all pre members(members who have signed up but not registered)
-  
-POST `/users/current`
+## Create databases
 
-  `{"token":token}`
+You need to login to `mysql`, and create the database names for your development and test environments and fill it in the `database.yaml`. For example,
 
-  Returns a JSON list of all active members
+In `mysql`:
+```
+CREATE DATABASE groot_quote_service_dev
+```
 
-POST `/users/paid`
-  
-  `{"token":token, "netid":netid}`
-  
-  Moves a user to the active members list.
+## Run Application
+```
+ruby app.rb
+```
 
-POST `/users/newUser`
-  
-  `{"netid":netid, "first_name":firstName, "last_name":lastName, "uin":uin}`
-  
-  Creates a new pre user based off the information posted to this endpoint
+## Routes (from `rake routes:show`)
 
-POST `/users/:netid`
+:: GET ::
+/quotes
+/quotes/:id
+/status
 
-  `{"token":token}`
+:: HEAD ::
+/quotes
+/quotes/:id
+/status
 
-  Returns a JSON list of the information of a specific member
+:: POST ::
+/quotes
+/quotes/:id/vote
 
-POST `/users/:netid/isMember`
+:: DELETE ::
+/quotes/:id
+/quotes/:id/vote
 
-  `{"token":token}`
-  
-  Returns either true or false if a specific person is an active member of ACM
-      
+:: PUT ::
+/quotes/:id/approve
+
+## Data Migration
+
+Run `rake db:liquid` to migrate a table dump of previous quotes in csv format. An example can be seen under `scripts/data.csv.template`.
 
 ## License
 
