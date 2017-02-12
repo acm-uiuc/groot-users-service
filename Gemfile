@@ -45,5 +45,4 @@ group :development, :test do
   gem 'better_errors' # Show an awesome console in the browser on error.
   gem 'rest-client'
   gem 'binding_of_caller'
-  gem 'oga'
 end

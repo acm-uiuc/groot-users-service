@@ -20,14 +20,14 @@ end
 get '/users' do
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
     
-    users = User.all(order: [ :paid.asc, :created_at.desc ])
-    ResponseFormat.success(users)
+    users = User.all(order: [ :is_member.asc, :created_at.desc ])
+    ResponseFormat.data(users)
 end
 
-get '/users/:id' do
+get '/users/:netid' do
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
 
-    user = User.get(params[:id]) || halt(404, Errors::USER_NOT_FOUND)
+    user = User.get(params[:netid]) || halt(404, Errors::USER_NOT_FOUND)
     ResponseFormat.data(user)
 end
 
@@ -39,7 +39,7 @@ get '/users/:netid/is_member' do
         netid: user.netid,
         first_name: user.first_name,
         last_name: user.last_name,
-        is_member: user.paid
+        is_member: user.is_member
     }
     response.to_json
 end
@@ -58,10 +58,11 @@ post '/users' do
         last_name: params[:last_name],
         netid: params[:netid],
         uin: params[:uin],
-        paid: false
+        is_member: false
     )
+    halt 400, ResponseFormat.error("Error with UIN") if user.errors.any?
 
-    ResponseFormat.message "User successfully added"
+    ResponseFormat.message "Your request to join ACM was successful."
 end
 
 post '/users/login' do
@@ -81,14 +82,14 @@ post '/users/login' do
 
     unless user
         # Fetch user info, fill in what we can, and then return with token
-        # Should be mostly for development
+        # Should be mostly for development, where we don't have real user data
         user_data = Auth.get_user_info(session_token)
 
         user = User.create(
             netid: netid,
             first_name: user_data["user"]["first-name"],
             last_name: user_data["user"]["last-name"],
-            paid: true # must be an ACM user to have gotten here
+            is_member: true # must be an ACM user to have gotten here
         )
     end
 
@@ -98,22 +99,22 @@ post '/users/login' do
     response.to_json
 end
 
-put '/users/:id/paid' do
-    # For marking a user as paid (basically make them approved)
+put '/users/:netid/paid' do
+    # For marking a user as paid (basically make them a member)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
 
-    user = User.get(params[:id])
+    user = User.first(netid: params[:netid])
     halt 404, ResponseFormat.error("User not found") unless user
-    halt 400, ResponseFormat.error("User is already a member") if user.paid
+    halt 400, ResponseFormat.error("User is already a member") if user.is_member
 
-    user.update(paid: true) || halt(500, ResponseFormat.error("Error updating user."))
-    ResponseFormat.data(User.all(order: [ :paid.asc, :created_at.desc ]))
-    
-    # TODO initiate some sort of crowd script that adds them to the AD or w/e
+    user.update(is_member: true) || halt(500, ResponseFormat.error("Error updating user."))
+
+    # TODO initiate some sort of crowd script that adds them to the AD or w/e (if possible)
+    ResponseFormat.data(User.all(order: [ :is_member.asc, :created_at.desc ]))
 end
 
+# TODO not used by UI - I guess not needed?
 post '/users/logout' do
-    # Talk to crowd, clear session
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:token])
@@ -124,12 +125,12 @@ post '/users/logout' do
     ResponseFormat.message("OK")
 end
 
-delete '/users/:id' do
+delete '/users/:netid' do
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
-    user = User.get(params[:id])
+    user = User.first(netid: params[:netid])
     halt 404, ResponseFormat.error("User not found") unless user
 
     user.destroy
-    ResponseFormat.data(User.all(order: [ :paid.asc, :created_at.desc ]))
+    ResponseFormat.data(User.all(order: [ :is_member.asc, :created_at.desc ]))
 end

@@ -22,7 +22,6 @@ require 'better_errors'
 require 'dm-mysql-adapter'
 require 'net/http'
 require 'uri'
-require 'oga'
 
 require_relative './models/init'
 require_relative './routes/init'
