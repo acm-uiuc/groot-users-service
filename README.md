@@ -23,10 +23,10 @@ You need to login to `mysql`, and create the database names for your development
 
 In `mysql`:
 ```
-CREATE DATABASE groot_quote_service_dev
+CREATE DATABASE groot_users_service_dev
 ```
 
-## Run Application
+## Run Application (on port 8001)
 ```
 ruby app.rb
 ```
@@ -34,29 +34,31 @@ ruby app.rb
 ## Routes (from `rake routes:show`)
 
 :: GET ::
-/quotes
-/quotes/:id
 /status
+/users
+/users/:netid
+/users/:netid/is_member
 
 :: HEAD ::
-/quotes
-/quotes/:id
 /status
+/users
+/users/:netid
+/users/:netid/is_member
 
 :: POST ::
-/quotes
-/quotes/:id/vote
-
-:: DELETE ::
-/quotes/:id
-/quotes/:id/vote
+/users
+/users/login
+/users/logout
 
 :: PUT ::
-/quotes/:id/approve
+/users/:netid/paid
+
+:: DELETE ::
+/users/:netid
 
 ## Data Migration
 
-Run `rake db:liquid` to migrate a table dump of previous quotes in csv format. An example can be seen under `scripts/data.csv.template`.
+Run `rake db:liquid` to migrate a table dump of previous users in csv format.
 
 ## License
 

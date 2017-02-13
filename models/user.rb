@@ -14,8 +14,8 @@ class User
     property :netid, String, required: true, unique_index: true
     property :first_name, String, required: true
     property :last_name, String, required: true
-    property :uin, Integer, unique: true, default: 0
-    # property :graduation_date, Date, default: Date.today.next_year.next_year.next_year.next_year
+    property :uin, Integer, unique: true
+    property :added_to_directory, Boolean, default: false
     property :created_at, DateTime
 
     def self.validate(params, attributes)
@@ -38,7 +38,8 @@ class User
         last_name: self.last_name,
         netid: self.netid,
         created_at: self.created_at,
-        paid: self.is_member
+        is_member: self.is_member,
+        added_to_directory: self.added_to_directory
       }
     end
 end
