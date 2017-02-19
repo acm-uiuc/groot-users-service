@@ -7,7 +7,8 @@ CSV.foreach(Dir.pwd + FILE_PATH, headers: true) do |row|
     last_name: row['last_name'],
     netid: row['netid'],
     is_member: true,
-    added_to_directory: true
+    added_to_directory: true,
+    created_at: row['joined']
   }
 
   params[:uin] = Integer(row['uin']) unless row['uin'] == "NULL"
