@@ -34,27 +34,45 @@ ruby app.rb
 ## Routes (from `rake routes:show`)
 
 :: GET ::
-/status
-/users
-/users/:netid
-/users/:netid/is_member
+
+`/status`
+
+`/users`
+
+`/users/:netid`
+
+`/users/:netid/is_member`
+
 
 :: HEAD ::
-/status
-/users
-/users/:netid
-/users/:netid/is_member
+
+`/status`
+
+`/users`
+
+`/users/:netid`
+
+`/users/:netid/is_member`
+
 
 :: POST ::
-/users
-/users/login
-/users/logout
+
+`/users`
+
+`/users/login`
+
+`/users/logout`
+
 
 :: PUT ::
-/users/:netid/paid
+
+`/users/:netid/paid`
+
 
 :: DELETE ::
-/users/:netid
+
+`/users/:netid`
+
 
 ## Data Migration
 
