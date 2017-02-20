@@ -9,15 +9,12 @@
 # encoding: UTF-8
 require_relative '../models/user'
 
-before do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
-end
-
 get '/status' do
     ResponseFormat.message("OK")
 end
 
 get '/users' do
+    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
     
     users = User.all(order: [ :is_member.asc, :created_at.desc ])
@@ -25,6 +22,7 @@ get '/users' do
 end
 
 get '/users/:netid' do
+    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
 
     user = User.get(params[:netid]) || halt(404, Errors::USER_NOT_FOUND)
@@ -100,6 +98,7 @@ post '/users/login' do
 end
 
 put '/users/:netid/paid' do
+    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
     # For marking a user as paid (basically make them a member)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
 
@@ -115,6 +114,7 @@ end
 
 # TODO not used by UI - I guess not needed?
 post '/users/logout' do
+    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:token])
@@ -126,6 +126,7 @@ post '/users/logout' do
 end
 
 delete '/users/:netid' do
+    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
     user = User.first(netid: params[:netid])
