@@ -2,3 +2,6 @@
 .DS_Store
 node_modules
 npm-debug.log
+scripts/active_users.csv
+config/database.yaml
+config/secrets.yaml

@@ -1,48 +1,64 @@
-# groot-users-service
-Users Services for Groot
+# Groot Users Service
 
-To use,``` npm install ``` and ```node server.js```
+## Installing MySQL
+```sh
+brew install mysql
+```
 
-Additionally, you must rename ```example.env``` to ```.env```, and put in your credentials in the ```.env``` file
+## Migrate DB after model alteration (clears all data)
+```
+rake db:migrate
+```
 
----
-###Endpoints for this User Service
-POST `/users/pre`
+## Create secrets.yaml and database.yaml
 
-  `{"token":token}`
+```
+cp secrets.yaml.template secrets.yaml
+cp database.yaml.template database.yaml
+```
 
-  Returns a JSON list of all pre members(members who have signed up but not registered)
-  
-POST `/users/current`
+## Create databases
 
-  `{"token":token}`
+You need to login to `mysql`, and create the database names for your development and test environments and fill it in the `database.yaml`. For example,
 
-  Returns a JSON list of all active members
+In `mysql`:
+```
+CREATE DATABASE groot_users_service_dev
+```
 
-POST `/users/paid`
-  
-  `{"token":token, "netid":netid}`
-  
-  Moves a user to the active members list.
+## Run Application (on port 8001)
+```
+ruby app.rb
+```
 
-POST `/users/newUser`
-  
-  `{"netid":netid, "first_name":firstName, "last_name":lastName, "uin":uin}`
-  
-  Creates a new pre user based off the information posted to this endpoint
+## Routes (from `rake routes:show`)
 
-POST `/users/:netid`
+:: GET ::
+/status
+/users
+/users/:netid
+/users/:netid/is_member
 
-  `{"token":token}`
+:: HEAD ::
+/status
+/users
+/users/:netid
+/users/:netid/is_member
 
-  Returns a JSON list of the information of a specific member
+:: POST ::
+/users
+/users/login
+/users/logout
 
-POST `/users/:netid/isMember`
+:: PUT ::
+/users/:netid/paid
 
-  `{"token":token}`
-  
-  Returns either true or false if a specific person is an active member of ACM
-      
+:: DELETE ::
+/users/:netid
+
+## Data Migration
+
+Run `rake db:liquid` to migrate a table dump of previous users in csv format.
 
 ## License
 
