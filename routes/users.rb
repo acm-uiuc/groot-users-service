@@ -9,6 +9,12 @@
 # encoding: UTF-8
 require_relative '../models/user'
 
+local_fake_user = {
+    "first-name": "Fake",
+    "last-name": "User",
+    "name": "jsmith2"
+}
+
 get '/status' do
     ResponseFormat.message("OK")
 end
@@ -69,18 +75,6 @@ post '/users/login' do
     status, error = User.validate(params, [:netid, :password])
     halt status, ResponseFormat.error(error) if error
 
-    if settings.unsecure
-        user = User.first(netid: params[:netid])
-        unless user
-            user = User.create(
-                netid: params[:netid],
-                first_name: "Local",
-                last_name: "User"
-            )
-        end
-        return ResponseFormat.data(user)
-    end
-
     result = Auth.verify_login(params[:netid], params[:password])
     halt 400, ResponseFormat.error("Invalid netid or password") unless result
     
@@ -89,7 +83,7 @@ post '/users/login' do
 
     user = User.first(netid: netid)
 
-    unless user
+    unless user || result["user"] == local_fake_user
         # Fetch user info, fill in what we can, and then return with token
         # Should be mostly for development, where we don't have real user data
         user_data = Auth.get_user_info(session_token)
@@ -144,4 +138,14 @@ delete '/users/:netid' do
 
     user.destroy
     ResponseFormat.data(User.all(order: [ :is_member.asc, :created_at.desc ]))
+end
+
+post '/session' do
+    halt 500, ResponseFormat.error("CROWD URL has not been set. This error message should never be seen") unless settings.unsecure
+
+    # Return stubbed fake json object of user
+    {
+        "token": "my-fake-token",
+        "user": local_fake_user
+    }.to_json
 end
