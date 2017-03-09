@@ -14,16 +14,16 @@ get '/status' do
 end
 
 get '/users' do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
-    halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
+    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
     
     users = User.all(order: [ :is_member.asc, :created_at.desc ])
     ResponseFormat.data(users)
 end
 
 get '/users/:netid' do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
-    halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env) || settings.unsecure
+    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
 
     user = User.get(params[:netid]) || halt(404, Errors::USER_NOT_FOUND)
     ResponseFormat.data(user)
@@ -64,11 +64,22 @@ post '/users' do
 end
 
 post '/users/login' do
-    # Talk to crowd, get data back, and create a user if we need to, which would avoid the need for a nightly AD script
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:netid, :password])
     halt status, ResponseFormat.error(error) if error
+
+    if settings.unsecure
+        user = User.first(netid: params[:netid])
+        unless user
+            user = User.create(
+                netid: params[:netid],
+                first_name: "Local",
+                last_name: "User"
+            )
+        end
+        return ResponseFormat.data(user)
+    end
 
     result = Auth.verify_login(params[:netid], params[:password])
     halt 400, ResponseFormat.error("Invalid netid or password") unless result
@@ -98,8 +109,7 @@ post '/users/login' do
 end
 
 put '/users/:netid/paid' do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
-    # For marking a user as paid (basically make them a member)
+    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
 
     user = User.first(netid: params[:netid])
@@ -114,7 +124,7 @@ end
 
 # TODO not used by UI - I guess not needed?
 post '/users/logout' do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
+    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:token])
@@ -126,7 +136,7 @@ post '/users/logout' do
 end
 
 delete '/users/:netid' do
-    halt(401, Errors::VERIFY_GROOT) unless Auth.verify_session(env) || settings.unsecure    
+    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
     user = User.first(netid: params[:netid])
