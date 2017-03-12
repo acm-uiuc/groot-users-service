@@ -81,19 +81,29 @@ post '/users/login' do
     session_token = result["token"]
     netid = result["user"]["name"]
 
-    user = User.first(netid: netid)
+    if result["user"].to_json == local_fake_user.to_json
+        user = User.first_or_create({
+            netid: local_fake_user[:name]
+        }, {
+            first_name: local_fake_user[:"first-name"],
+            last_name: local_fake_user[:"last-name"],
+            netid: local_fake_user[:name],
+            is_member: true
+        })
+    else
+        user = User.first(netid: netid)
+        unless user
+            # Fetch user info, fill in what we can, and then return with token
+            # Should be mostly for development, where we don't have real user data
+            user_data = Auth.get_user_info(session_token)
 
-    unless user || result["user"] == local_fake_user
-        # Fetch user info, fill in what we can, and then return with token
-        # Should be mostly for development, where we don't have real user data
-        user_data = Auth.get_user_info(session_token)
-
-        user = User.create(
-            netid: netid,
-            first_name: user_data["user"]["first-name"],
-            last_name: user_data["user"]["last-name"],
-            is_member: true # must be an ACM user to have gotten here
-        )
+            user = User.create(
+                netid: netid,
+                first_name: user_data["user"]["first-name"],
+                last_name: user_data["user"]["last-name"],
+                is_member: true # must be an ACM user to have gotten here
+            )
+        end
     end
 
     response = JSON.parse(ResponseFormat.data(user))
@@ -141,7 +151,7 @@ delete '/users/:netid' do
 end
 
 
-post '/session' do
+post '/users/session' do
     halt 500, ResponseFormat.error("CROWD URL has not been set. This error message should never be seen") unless settings.unsecure
 
     # Return stubbed fake json object of user
