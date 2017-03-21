@@ -101,7 +101,7 @@ module Auth
   end
 
   def self.get_user_info(session_token)
-    uri = URI.parse("#{SERVICES_URL}/session/#{session_token}.json")
+    uri = URI.parse("#{SERVICES_URL}/session/#{session_token}")
     groot_access_key = Config.load_config("groot")["access_key"]
     
     http = Net::HTTP.new(uri.host, uri.port)

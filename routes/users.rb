@@ -144,7 +144,7 @@ delete '/users/:netid' do
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
     user = User.first(netid: params[:netid])
-    halt 404, ResponseFormat.error("User not found") unless user
+    halt 404, Errors::USER_NOT_FOUND unless user
 
     user.destroy
     ResponseFormat.data(User.all(order: [ :is_member.asc, :created_at.desc ]))

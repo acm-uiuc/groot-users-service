@@ -9,6 +9,6 @@
 require_relative 'response_format'
 module Errors
   VERIFY_GROOT = ResponseFormat.error "Request did not originate from groot"
-
   VERIFY_CREDS = ResponseFormat.error "Request did not originate from valid admin privileges"
+  USER_NOT_FOUND = ResponseFormat.error "User not found"
 end
