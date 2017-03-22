@@ -52,6 +52,8 @@ configure :development do
 end
 
 configure :production do
+    disable :unsecure
+    
     db = Config.load_db("production")
     DataMapper.setup(
         :default,

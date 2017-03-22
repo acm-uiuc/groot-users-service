@@ -20,16 +20,16 @@ get '/status' do
 end
 
 get '/users' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
-    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless Sinatra::Application.unsecure || Auth.verify_admin(env)
     
     users = User.all(order: [ :is_member.asc, :created_at.desc ])
     ResponseFormat.data(users)
 end
 
 get '/users/:netid' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
-    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless Sinatra::Application.unsecure || Auth.verify_admin(env)
 
     user = User.get(params[:netid]) || halt(404, Errors::USER_NOT_FOUND)
     ResponseFormat.data(user)
@@ -113,7 +113,7 @@ post '/users/login' do
 end
 
 put '/users/:netid/paid' do
-    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_GROOT unless Sinatra::Application.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
 
     user = User.first(netid: params[:netid])
@@ -128,7 +128,7 @@ end
 
 # TODO not used by UI - I guess not needed?
 post '/users/logout' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:token])
@@ -140,7 +140,7 @@ post '/users/logout' do
 end
 
 delete '/users/:netid' do
-    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_GROOT unless Sinatra::Application.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
     user = User.first(netid: params[:netid])
@@ -152,7 +152,7 @@ end
 
 
 post '/users/session' do
-    halt 500, ResponseFormat.error("CROWD URL has not been set. This error message should never be seen") unless settings.unsecure
+    halt 500, ResponseFormat.error("CROWD URL has not been set. This error message should never be seen") unless Sinatra::Application.unsecure
 
     # Return stubbed fake json object of user
     {
