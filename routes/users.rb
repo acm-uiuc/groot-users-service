@@ -9,21 +9,21 @@
 # encoding: UTF-8
 require_relative '../models/user'
 
-get '/status' do
+get '/users/status' do
     ResponseFormat.message("OK")
 end
 
 get '/users' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
-    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless Sinatra::Application.unsecure || Auth.verify_admin(env)
     
     users = User.all(order: [ :is_member.asc, :created_at.desc ])
     ResponseFormat.data(users)
 end
 
 get '/users/:netid' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
-    halt 401, Errors::VERIFY_CREDS unless settings.unsecure || Auth.verify_admin(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_CREDS unless Sinatra::Application.unsecure || Auth.verify_admin(env)
 
     user = User.get(params[:netid]) || halt(404, Errors::USER_NOT_FOUND)
     ResponseFormat.data(user)
@@ -75,31 +75,19 @@ post '/users/login' do
     session_token = result["token"]
     netid = result["user"]["name"]
 
-    if result["user"].to_json == local_fake_user.to_json
-        user = User.first_or_create({
-            netid: local_fake_user[:name]
-        }, {
-            first_name: local_fake_user[:"first-name"],
-            last_name: local_fake_user[:"last-name"],
-            netid: local_fake_user[:name],
-            is_member: true
-        })
-    else
-        user = User.first(netid: netid)
-        unless user
-            # Fetch user info, fill in what we can, and then return with token
-            # Should be mostly for development, where we don't have real user data
-            user_data = Auth.get_user_info(session_token)
+    user = User.first(netid: netid)
+    unless user
+        # Fetch user info, fill in what we can, and then return with token
+        # Should be mostly for development, where we don't have real user data
+        user_data = Auth.get_user_info(session_token)
 
-            user = User.create(
-                netid: netid,
-                first_name: user_data["user"]["first-name"],
-                last_name: user_data["user"]["last-name"],
-                is_member: true # must be an ACM user to have gotten here
-            )
-        end
+        user = User.create(
+            netid: netid,
+            first_name: user_data["user"]["first-name"],
+            last_name: user_data["user"]["last-name"],
+            is_member: true # must be an ACM user to have gotten here
+        )
     end
-
     response = JSON.parse(ResponseFormat.data(user))
     response['data']['token'] = session_token
 
@@ -107,7 +95,7 @@ post '/users/login' do
 end
 
 put '/users/:netid/paid' do
-    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_GROOT unless Sinatra::Application.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
 
     user = User.first(netid: params[:netid])
@@ -122,7 +110,7 @@ end
 
 # TODO not used by UI - I guess not needed?
 post '/users/logout' do
-    halt(401, Errors::VERIFY_GROOT) unless settings.unsecure || Auth.verify_session(env)
+    halt(401, Errors::VERIFY_GROOT) unless Sinatra::Application.unsecure || Auth.verify_session(env)
     params = ResponseFormat.get_params(request.body.read)
     
     status, error = User.validate(params, [:token])
@@ -134,7 +122,7 @@ post '/users/logout' do
 end
 
 delete '/users/:netid' do
-    halt 401, Errors::VERIFY_GROOT unless settings.unsecure || Auth.verify_session(env)
+    halt 401, Errors::VERIFY_GROOT unless Sinatra::Application.unsecure || Auth.verify_session(env)
     halt 401, Errors::VERIFY_CREDS unless Auth.verify_admin(env)
     
     user = User.first(netid: params[:netid])
