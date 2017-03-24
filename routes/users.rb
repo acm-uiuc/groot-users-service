@@ -9,12 +9,6 @@
 # encoding: UTF-8
 require_relative '../models/user'
 
-local_fake_user = {
-    "first-name": "Fake",
-    "last-name": "User",
-    "name": "jsmith2"
-}
-
 get '/status' do
     ResponseFormat.message("OK")
 end
@@ -148,15 +142,4 @@ delete '/users/:netid' do
 
     user.destroy
     ResponseFormat.data(User.all(order: [ :is_member.asc, :created_at.desc ]))
-end
-
-
-post '/users/session' do
-    halt 500, ResponseFormat.error("CROWD URL has not been set. This error message should never be seen") unless settings.unsecure
-
-    # Return stubbed fake json object of user
-    {
-        "token": "my-fake-token",
-        "user": local_fake_user
-    }.to_json
 end
