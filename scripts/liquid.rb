@@ -1,4 +1,4 @@
-FILE_PATH = "/scripts/active_users.csv"
+FILE_PATH = '/scripts/active_users.csv'.freeze
 puts "IMPORT LOCATION: #{FILE_PATH}"
 
 CSV.foreach(Dir.pwd + FILE_PATH, headers: true) do |row|
@@ -11,7 +11,7 @@ CSV.foreach(Dir.pwd + FILE_PATH, headers: true) do |row|
     created_at: row['joined']
   }
 
-  params[:uin] = Integer(row['uin']) unless row['uin'] == "NULL"
+  params[:uin] = Integer(row['uin']) unless row['uin'] == 'NULL'
 
   User.create(params)
 end
