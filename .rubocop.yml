@@ -1,5 +1,5 @@
 Metrics/LineLength:
-  Enabled: False
+  Max: 120
 
 # Offense count: 1
 # Configuration parameters: CountComments.
@@ -13,6 +13,9 @@ Style/AsciiComments:
 # Offense count: 3
 Style/Documentation:
   Enabled: false
+
+Style/SymbolArray:
+  Enabled: true
 
 Metrics/MethodLength:
   Enabled: false
