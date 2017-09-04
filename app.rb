@@ -45,6 +45,7 @@ DataMapper.setup(
 
 configure :development do
   enable :unsecure
+  register Sinatra::Reloader
 
   DataMapper::Logger.new($stdout, :debug)
   use BetterErrors::Middleware
