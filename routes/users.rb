@@ -8,6 +8,8 @@
 # app.rb
 # encoding: UTF-8
 
+require 'net/http'
+require 'uri'
 require_relative '../models/user'
 
 get '/users/status' do
@@ -104,6 +106,14 @@ put '/users/:netid/paid' do
   halt 400, ResponseFormat.error('User is already a member') if user.is_member
 
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
+  
+  
+  uri = URI.parse("#{Auth.services_url}/activedirectory/add/#{netid}")
+  http = Net::HTTP.new(uri.host, uri.port)
+  request = Net::HTTP::Get.new(uri.request_uri)
+  request['Authorization'] = Auth.groot_access_key
+
+  http.request(request)
 
   # TODO: initiate some sort of crowd script that adds them to the AD or w/e (if possible)
   ResponseFormat.data(User.all(order: [:is_member.asc, :created_at.desc]))
