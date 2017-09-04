@@ -107,7 +107,6 @@ put '/users/:netid/paid' do
 
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
   
-  
   uri = URI.parse("#{Auth.services_url}/activedirectory/add/#{netid}")
   http = Net::HTTP.new(uri.host, uri.port)
   request = Net::HTTP::Get.new(uri.request_uri)
