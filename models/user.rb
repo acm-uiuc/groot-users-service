@@ -30,6 +30,10 @@ class User
                       nil
                     end
         return [400, 'UIN must be an integer'] unless int_value
+      when :netid
+        invalid_netid = /^[a-z]{3,7}[2-9]{1,4}$/.match(params[:netid]).nil? ||
+                        params[:netid].length > 8
+        return [400, 'A valid netid must be entered'] if invalid_netid
       end
     end
 
