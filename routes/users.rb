@@ -62,6 +62,7 @@ post '/users' do
     is_member: false
   )
   halt 400, ResponseFormat.error('Error with UIN') if user.errors.any?
+  # send email here, generate token
 
   ResponseFormat.message 'Your request to join ACM was successful.'
 end
@@ -106,15 +107,17 @@ put '/users/:netid/paid' do
   halt 400, ResponseFormat.error('User is already a member') if user.is_member
 
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
-  
-  uri = URI.parse("#{Auth.services_url}/activedirectory/add/#{netid}")
+
+  uri = URI.parse("#{Auth.ADD_MEMBER_ACTIVEDIRECTORY_URL}#{netid}")
+  puts uri
   http = Net::HTTP.new(uri.host, uri.port)
   request = Net::HTTP::Get.new(uri.request_uri)
   request['Authorization'] = Auth.groot_access_key
 
-  http.request(request)
-
-  # TODO: initiate some sort of crowd script that adds them to the AD or w/e (if possible)
+  response = http.request(request)
+  if response.code == '200'
+    user.update(added_to_directory: true) || halt(500, ResponseFormat.error('Error updating user.'))
+  end
   ResponseFormat.data(User.all(order: [:is_member.asc, :created_at.desc]))
 end
 

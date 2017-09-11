@@ -12,6 +12,7 @@ require 'pry'
 module Auth
   VERIFY_COMMITTEE_URL = '/groups/committees/'.freeze
   VALIDATE_SESSION_URL = '/session/'.freeze
+  ADD_MEMBER_ACTIVEDIRECTORY_URL = Config.load_config('activeDirectory')['service_url'] + '/activedirectory/add/'.freeze
 
   def self.services_url
     Config.load_config('groot')['host']

@@ -8,3 +8,4 @@
 # app.rb
 
 require_relative './user'
+require_relative './token'
