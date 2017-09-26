@@ -21,6 +21,14 @@ module Auth
     Config.load_config('groot')['access_key']
   end
 
+  def self.active_directory_url
+    Config.load_config('activeDirectory')['service_url'] + '/activedirectory/add/'.freeze
+  end
+
+  def self.active_directory_access_key
+    Config.load_config('activeDirectory')['access_key']
+  end
+
   # Verifies that an admin (defined by groups service) originated this request
   def self.verify_credentials(type, request)
     netid = request['HTTP_NETID']

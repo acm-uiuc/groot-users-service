@@ -107,12 +107,17 @@ put '/users/:netid/paid' do
 
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
   
-  uri = URI.parse("#{Auth.services_url}/activedirectory/add/#{netid}")
+  uri = URI.parse("#{Auth.active_directory_url}#{netid}")
   http = Net::HTTP.new(uri.host, uri.port)
-  request = Net::HTTP::Get.new(uri.request_uri)
-  request['Authorization'] = Auth.groot_access_key
+  request = Net::HTTP::Post.new(uri.request_uri)
+  request['Authorization'] = Auth.active_directory_access_key
 
-  http.request(request)
+  active_directory_add_request = http.request(request)
+
+  puts active_directory_add_request
+  if active_directory_add_request.status == 200
+    user.update(added_to_directory: true) || halt(500, ResponseFormat.error('Error updating user.'))
+  end    
 
   # TODO: initiate some sort of crowd script that adds them to the AD or w/e (if possible)
   ResponseFormat.data(User.all(order: [:is_member.asc, :created_at.desc]))
