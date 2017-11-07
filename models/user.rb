@@ -26,7 +26,7 @@ class User
       when :uin
         int_value = begin
                       Integer(params[:uin])
-                    rescue
+                    rescue ArgumentError
                       nil
                     end
         return [400, 'UIN must be an integer'] unless int_value

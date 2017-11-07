@@ -30,7 +30,7 @@ module ResponseFormat
   def self.get_params(raw_payload)
     json_params = begin
                       JSON.parse(raw_payload)
-                    rescue
+                    rescue JSON::JSONError
                       nil
                     end
 
