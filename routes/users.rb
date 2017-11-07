@@ -106,7 +106,7 @@ put '/users/:netid/paid' do
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
 
   # TODO: initiate some sort of crowd script that adds them to the AD or w/e (if possible)
-  ResponseFormat.data(User.all(order: [:is_member.asc, :created_at.desc]))
+  ResponseFormat.message('OK')
 end
 
 # TODO: not used by UI - I guess not needed?

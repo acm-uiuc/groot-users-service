@@ -71,4 +71,8 @@ configure :production do
   DataMapper.finalize
 end
 
+before do
+  content_type 'application/json'
+end
+
 DataMapper.finalize
