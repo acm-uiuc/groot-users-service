@@ -61,6 +61,12 @@ post '/users' do
   )
   halt 400, ResponseFormat.error('Error with UIN') if user.errors.any?
 
+  Notification.send_email(
+    "#{params[:netid]}@illinois.edu",
+    "Welcome to ACM@UIUC!",
+    erb(:new_member_welcome, locals: { first_name: params[:first_name], netid: params[:netid]})
+  )
+
   ResponseFormat.message 'Your request to join ACM was successful.'
 end
 
@@ -106,6 +112,13 @@ put '/users/:netid/paid' do
   user.update(is_member: true) || halt(500, ResponseFormat.error('Error updating user.'))
 
   # TODO: initiate some sort of crowd script that adds them to the AD or w/e (if possible)
+
+  Notification.send_email(
+    "#{params[:netid]}@illinois.edu",
+    "Thanks for your membership payment for ACM@UIUC",
+    erb(:membership_payment_confirmation, locals: { first_name: params[:first_name] })
+  )
+
   ResponseFormat.message('OK')
 end
 
