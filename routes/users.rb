@@ -116,7 +116,7 @@ put '/users/:netid/paid' do
   Notification.send_email(
     "#{params[:netid]}@illinois.edu",
     'Thanks for your membership payment for ACM@UIUC',
-    erb(:membership_payment_confirmation, locals: { first_name: params[:first_name] })
+    erb(:membership_payment_confirmation, locals: { first_name: user.first_name })
   )
 
   ResponseFormat.message('OK')
