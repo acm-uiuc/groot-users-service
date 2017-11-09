@@ -22,10 +22,12 @@ require 'better_errors'
 require 'dm-mysql-adapter'
 require 'net/http'
 require 'uri'
+require 'sucker_punch'
 
 require_relative './models/init'
-require_relative './routes/init'
 require_relative './helpers/init'
+require_relative './jobs/init'
+require_relative './routes/init'
 
 register Sinatra::CrossOrigin
 
