@@ -12,7 +12,7 @@ require 'pry'
 
 module Notification
   NOTIFICATION_URL = '/notification'.freeze
-  SENDER_EMAIL = 'acm@acm.illinois.edu'
+  SENDER_EMAIL = 'acm@acm.illinois.edu'.freeze
 
   def self.services_url
     Config.load_config('groot')['host']

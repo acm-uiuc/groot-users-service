@@ -63,8 +63,8 @@ post '/users' do
 
   Notification.send_email(
     "#{params[:netid]}@illinois.edu",
-    "Welcome to ACM@UIUC!",
-    erb(:new_member_welcome, locals: { first_name: params[:first_name], netid: params[:netid]})
+    'Welcome to ACM@UIUC!',
+    erb(:new_member_welcome, locals: { first_name: params[:first_name], netid: params[:netid] })
   )
 
   ResponseFormat.message 'Your request to join ACM was successful.'
@@ -115,7 +115,7 @@ put '/users/:netid/paid' do
 
   Notification.send_email(
     "#{params[:netid]}@illinois.edu",
-    "Thanks for your membership payment for ACM@UIUC",
+    'Thanks for your membership payment for ACM@UIUC',
     erb(:membership_payment_confirmation, locals: { first_name: params[:first_name] })
   )
 
