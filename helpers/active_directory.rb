@@ -25,7 +25,7 @@ module ActiveDirectory
   def self.add_user(netid)
     uri = URI.parse("#{ActiveDirectory.services_url}#{ADD_USER_URL}")
     http = Net::HTTP.new(uri.host, uri.port)
-    http.read_timeout = 60 # AD Service can take a long time
+    # http.read_timeout = 60 # AD Service can take a long time
     request = Net::HTTP::Post.new(uri.request_uri)
     request.body = {
       netid: netid
