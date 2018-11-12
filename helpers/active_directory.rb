@@ -11,27 +11,30 @@ require 'uri'
 require 'pry'
 
 module ActiveDirectory
-  ADD_USER_URL = '/activedirectory/add/'.freeze
+  ADD_USER_URL = '/activedirectory/add'.freeze
 
-  def self.ad_service_url
-    Config.load_config('groot')['ad_host']
+  def self.services_url
+    Config.load_config('groot')['host']
   end
 
-  def self.ad_access_token
-    Config.load_config('groot')['ad_access_token']
+  def self.groot_access_key
+    Config.load_config('groot')['access_key']
   end
 
   # Adds the given user to the ACM Active Directory
   def self.add_user(netid)
-    uri = URI.parse("#{ActiveDirectory.ad_service_url}#{ADD_USER_URL}#{netid}")
+    uri = URI.parse("#{ActiveDirectory.services_url}#{ADD_USER_URL}")
     http = Net::HTTP.new(uri.host, uri.port)
     http.read_timeout = 60 # AD Service can take a long time
-    request = Net::HTTP::Get.new(uri.request_uri)
-    request['Authorization'] = ActiveDirectory.ad_access_token
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request.body = {
+      netid: netid
+    }.to_json
+    request['Authorization'] = groot_access_key
     request['Accept'] = 'application/json'
     request['Content-Type'] = 'application/json'
 
-    response = http.request(request)
-    response.code == '200'
+    return false unless response.code == '200'
+    JSON.parse(response.body)
   end
 end
