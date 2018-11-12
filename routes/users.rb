@@ -123,7 +123,7 @@ put '/users/:netid/paid' do
     erb(:membership_payment_confirmation, locals: { first_name: user.first_name })
   )
 
-  ResponseFormat.message('OK')
+  ResponseFormat.data(User.all(order: [:is_member.asc, :created_at.desc]))
 end
 
 # TODO: not used by UI - I guess not needed?
