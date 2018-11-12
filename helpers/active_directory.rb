@@ -35,8 +35,8 @@ module ActiveDirectory
     request['Content-Type'] = 'application/json'
     response = http.request(request)
 
-
     return false unless response.code == '200'
+
     JSON.parse(response.body)
   end
 end

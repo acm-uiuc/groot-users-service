@@ -35,7 +35,7 @@ configure do
   enable :cross_origin
 end
 
-set :root, File.expand_path('..', __FILE__)
+set :root, File.expand_path(__FILE__)
 set :port, 8001
 set :bind, '0.0.0.0'
 
@@ -54,7 +54,7 @@ configure :development do
   DataMapper::Logger.new($stdout, :debug)
   use BetterErrors::Middleware
 
-  BetterErrors.application_root = File.expand_path('..', __FILE__)
+  BetterErrors.application_root = File.expand_path(__FILE__)
   DataMapper.auto_upgrade!
 end
 
