@@ -33,6 +33,8 @@ module ActiveDirectory
     request['Authorization'] = groot_access_key
     request['Accept'] = 'application/json'
     request['Content-Type'] = 'application/json'
+    response = http.request(request)
+
 
     return false unless response.code == '200'
     JSON.parse(response.body)
