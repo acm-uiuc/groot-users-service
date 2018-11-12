@@ -9,6 +9,7 @@
 require 'net/http'
 require 'uri'
 require 'pry'
+require_relative '../models/user'
 
 module ActiveDirectory
   ADD_USER_URL = '/activedirectory/add'.freeze
@@ -25,7 +26,6 @@ module ActiveDirectory
   def self.add_user(netid)
     uri = URI.parse("#{ActiveDirectory.services_url}#{ADD_USER_URL}")
     http = Net::HTTP.new(uri.host, uri.port)
-    # http.read_timeout = 60 # AD Service can take a long time
     request = Net::HTTP::Post.new(uri.request_uri)
     request.body = {
       netid: netid
@@ -37,6 +37,9 @@ module ActiveDirectory
 
     return false unless response.code == '200'
 
-    JSON.parse(response.body)
+    user = User.first(netid: netid)
+    return false unless user && user.is_member
+
+    user.update(added_to_directory: true)
   end
 end

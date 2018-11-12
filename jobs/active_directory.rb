@@ -14,9 +14,6 @@ class ActiveDirectoryJob
   include ActiveDirectory
 
   def perform(netid)
-    successful = ActiveDirectory.add_user(netid)
-    # need to mark user as 'added_to_directory' if success
-    # ActiveDirectoryJob.perform_in(300, netid) unless successful
-    # successful
+    ActiveDirectory.add_user(netid)
   end
 end

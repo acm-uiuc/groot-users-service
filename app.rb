@@ -38,7 +38,7 @@ end
 set :root, File.join(File.dirname(__FILE__))
 set :port, 8001
 set :bind, '0.0.0.0'
-set :views, Proc.new { File.join(root, "views") }
+set :views, (proc { File.join(root, 'views') })
 
 configure :development, :production do
   db = Config.load_config('database')
