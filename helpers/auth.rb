@@ -53,6 +53,7 @@ module Auth
     response = http.request(request)
 
     return false unless response.code == '200'
+
     JSON.parse(response.body)['token'] == session_token
   end
 
@@ -77,6 +78,7 @@ module Auth
     response = http.request(request)
 
     return false unless response.code == '200'
+
     JSON.parse(response.body)
   end
 
@@ -98,6 +100,7 @@ module Auth
     response = http.request(request)
 
     return false unless response.code == '200'
+
     JSON.parse(response.body)
   end
 
@@ -120,6 +123,7 @@ module Auth
     response = http.request(request)
 
     return false unless response.code == '200'
+
     JSON.parse(response.body)
   end
 

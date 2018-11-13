@@ -6,8 +6,14 @@
 # Illinois/NCSA Open Source License. You should have received a copy of
 # this license in a file with the distribution.
 
-require_relative 'auth'
-require_relative 'errors'
-require_relative 'config'
-require_relative 'response_format'
-require_relative 'notification'
+require 'sucker_punch'
+require_relative '../helpers/notification'
+
+class EmailNotificationJob
+  include SuckerPunch::Job
+  include Notification
+
+  def perform(recipient, subject, message)
+    Notification.send_email(recipient, subject, message)
+  end
+end

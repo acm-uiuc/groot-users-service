@@ -6,8 +6,14 @@
 # Illinois/NCSA Open Source License. You should have received a copy of
 # this license in a file with the distribution.
 
-require_relative 'auth'
-require_relative 'errors'
-require_relative 'config'
-require_relative 'response_format'
-require_relative 'notification'
+require 'sucker_punch'
+require_relative '../helpers/active_directory'
+
+class ActiveDirectoryJob
+  include SuckerPunch::Job
+  include ActiveDirectory
+
+  def perform(netid)
+    ActiveDirectory.add_user(netid)
+  end
+end

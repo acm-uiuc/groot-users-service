@@ -6,8 +6,5 @@
 # Illinois/NCSA Open Source License. You should have received a copy of
 # this license in a file with the distribution.
 
-require_relative 'auth'
-require_relative 'errors'
-require_relative 'config'
-require_relative 'response_format'
-require_relative 'notification'
+require_relative 'active_directory'
+require_relative 'email'

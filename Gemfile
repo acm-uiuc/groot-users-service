@@ -15,6 +15,7 @@ gem 'foreigner'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-cross_origin', '~> 0.3.1'
+gem 'sucker_punch', '~> 2.0'
 
 gem 'data_mapper'
 gem 'dm-constraints'

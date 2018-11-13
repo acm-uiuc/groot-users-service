@@ -29,10 +29,10 @@ module ResponseFormat
   # This method converts the keys to symbols and returns the formatted JSON as a Ruby Hash.
   def self.get_params(raw_payload)
     json_params = begin
-                      JSON.parse(raw_payload)
-                    rescue JSON::JSONError
-                      nil
-                    end
+                    JSON.parse(raw_payload)
+                  rescue JSON::JSONError
+                    nil
+                  end
 
     params = {}
     json_params.each { |k, v| params[k.to_sym] = v } unless json_params.nil?

@@ -22,10 +22,12 @@ require 'better_errors'
 require 'dm-mysql-adapter'
 require 'net/http'
 require 'uri'
+require 'sucker_punch'
 
 require_relative './models/init'
-require_relative './routes/init'
 require_relative './helpers/init'
+require_relative './jobs/init'
+require_relative './routes/init'
 
 register Sinatra::CrossOrigin
 
@@ -33,9 +35,10 @@ configure do
   enable :cross_origin
 end
 
-set :root, File.expand_path(__dir__)
+set :root, File.join(File.dirname(__FILE__))
 set :port, 8001
 set :bind, '0.0.0.0'
+set :views, (proc { File.join(root, 'views') })
 
 configure :development, :production do
   db = Config.load_config('database')
@@ -52,7 +55,7 @@ configure :development do
   DataMapper::Logger.new($stdout, :debug)
   use BetterErrors::Middleware
 
-  BetterErrors.application_root = File.expand_path(__dir__)
+  BetterErrors.application_root = File.expand_path(__FILE__)
   DataMapper.auto_upgrade!
 end
 
